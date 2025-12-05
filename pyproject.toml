@@ -18,12 +18,6 @@ classifiers = [
     "Environment :: X11 Applications :: Qt",
     "Topic :: Multimedia :: Sound/Audio :: Players",
 ]
-py_modules = [
-    "radio_scheduler_gui",
-    "radio_scheduler",
-    "mpc_controller",
-    "translations"
-]
 dependencies = [
     "PySide6",
     "PyYAML",
@@ -36,3 +30,11 @@ radio-scheduler-daemon = "radio_scheduler:main" # Corrected entry point
 [project.urls]
 "Homepage" = "https://github.com/Daszkan/radio-scheduler"
 "Bug Tracker" = "https://github.com/Daszkan/radio-scheduler/issues"
+
+[tool.setuptools]
+py_modules = [
+    "radio_scheduler_gui",
+    "radio_scheduler",
+    "mpc_controller",
+    "translations"
+]
