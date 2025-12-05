@@ -32,7 +32,7 @@ radio-scheduler-daemon = "radio_scheduler:main" # Corrected entry point
 "Bug Tracker" = "https://github.com/Daszkan/radio-scheduler/issues"
 
 [tool.setuptools]
-py_modules = [
+py-modules = [
     "radio_scheduler_gui",
     "radio_scheduler",
     "mpc_controller",
