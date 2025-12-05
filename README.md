@@ -2,7 +2,6 @@
 
 RadioScheduler to aplikacja desktopowa do planowania i automatycznego odtwarzania internetowych stacji radiowych. Składa się z demona działającego w tle oraz interfejsu graficznego (GUI) do zarządzania.
 
-![screenshot](https://i.imgur.com/your_screenshot.png) <!-- Placeholder for a screenshot -->
 
 ## Główne funkcje
 
