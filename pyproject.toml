@@ -11,13 +11,18 @@ authors = [
 description = "Aplikacja do planowania i automatycznego odtwarzania internetowych stacji radiowych."
 readme = "README.md"
 requires-python = ">=3.8"
-license = { file="LICENSE" } # Upewnij się, że masz plik LICENSE w repozytorium
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Environment :: X11 Applications :: Qt",
     "Topic :: Multimedia :: Sound/Audio :: Players",
+]
+py_modules = [
+    "radio_scheduler_gui",
+    "radio_scheduler",
+    "mpc_controller",
+    "translations"
 ]
 dependencies = [
     "PySide6",
@@ -25,8 +30,8 @@ dependencies = [
 ]
 
 [project.scripts]
-radio-scheduler-gui = "radio_scheduler_gui:main"
-radio-scheduler-daemon = "radio_scheduler:main"
+radio-scheduler-gui = "radio_scheduler_gui:main" # Corrected entry point
+radio-scheduler-daemon = "radio_scheduler:main" # Corrected entry point
 
 [project.urls]
 "Homepage" = "https://github.com/Daszkan/radio-scheduler"
