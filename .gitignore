@@ -1,0 +1,13 @@
+# Pliki generowane przez Pythona
+__pycache__/
+*.pyc
+
+# Pliki generowane przez narzędzia do budowania
+dist/
+build/
+*.egg-info/
+
+# Pliki konfiguracyjne i logi specyficzne dla użytkownika
+*.log
+manual_override.lock
+no-news-today
