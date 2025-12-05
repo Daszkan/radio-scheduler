@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "radio-scheduler"
+version = "1.0.0"
+authors = [
+  { name="Daszkan (Jacek S.)", email="metrokontakt24@gmail.com" },
+]
+description = "Aplikacja do planowania i automatycznego odtwarzania internetowych stacji radiowych."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file="LICENSE" } # Upewnij się, że masz plik LICENSE w repozytorium
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Environment :: X11 Applications :: Qt",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+]
+dependencies = [
+    "PySide6",
+    "PyYAML",
+]
+
+[project.scripts]
+radio-scheduler-gui = "radio_scheduler_gui:main"
+radio-scheduler-daemon = "radio_scheduler:main"
+
+[project.urls]
+"Homepage" = "https://github.com/Daszkan/radio-scheduler"
+"Bug Tracker" = "https://github.com/Daszkan/radio-scheduler/issues"

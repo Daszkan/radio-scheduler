@@ -1,0 +1,582 @@
+2025-12-05 15:18:48,971 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:18:48,980 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:18:49,055 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:18:58,809 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:19:08,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:20:14,730 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:20:14,739 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:20:14,788 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:20:24,814 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:20:34,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:22:31,560 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:22:31,570 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:22:31,633 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:25:09,504 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:25:09,515 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:25:09,566 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:25:19,811 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:26:52,531 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:26:52,551 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:26:52,616 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:27:02,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:27:12,809 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:27:22,809 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:27:32,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:27:42,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:27:52,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:28:02,809 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:28:56,534 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 751, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 182, in __init__
+    self.create_tray_icon()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 225, in create_tray_icon
+    self.tray = QSystemTrayIcon(self.style().standardIcon(DEFAULT_ICON), self)
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+TypeError: 'PySide6.QtWidgets.QCommonStyle.standardIcon' called with wrong argument types:
+  PySide6.QtWidgets.QCommonStyle.standardIcon(str)
+Supported signatures:
+  PySide6.QtWidgets.QCommonStyle.standardIcon(standardIcon: PySide6.QtWidgets.QStyle.StandardPixmap, /, opt: PySide6.QtWidgets.QStyleOption | None = None, widget: PySide6.QtWidgets.QWidget | None = None)
+2025-12-05 15:29:06,479 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 751, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 182, in __init__
+    self.create_tray_icon()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 225, in create_tray_icon
+    self.tray = QSystemTrayIcon(self.style().standardIcon(DEFAULT_ICON), self)
+                                ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+TypeError: 'PySide6.QtWidgets.QCommonStyle.standardIcon' called with wrong argument types:
+  PySide6.QtWidgets.QCommonStyle.standardIcon(str)
+Supported signatures:
+  PySide6.QtWidgets.QCommonStyle.standardIcon(standardIcon: PySide6.QtWidgets.QStyle.StandardPixmap, /, opt: PySide6.QtWidgets.QStyleOption | None = None, widget: PySide6.QtWidgets.QWidget | None = None)
+2025-12-05 15:31:54,384 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:31:54,392 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:31:54,437 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:32:04,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:32:07,344 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:32:07,350 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:32:14,810 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:36:14,818 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:37:34,818 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:39:54,827 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:41:34,815 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:46:53,974 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:46:53,985 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:46:54,046 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:47:46,989 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:47:46,996 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:47:47,053 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:49:16,417 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 788, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 181, in __init__
+    self.create_actions()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 222, in create_actions
+    self.save_action.triggered.connect(self.save_config)
+                                       ^^^^^^^^^^^^^^^^
+AttributeError: 'MainWindow' object has no attribute 'save_config'. Did you mean: 'load_config'?
+2025-12-05 15:49:25,764 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 788, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 181, in __init__
+    self.create_actions()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 222, in create_actions
+    self.save_action.triggered.connect(self.save_config)
+                                       ^^^^^^^^^^^^^^^^
+AttributeError: 'MainWindow' object has no attribute 'save_config'. Did you mean: 'load_config'?
+2025-12-05 15:56:22,216 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:56:22,236 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:56:22,393 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:58:47,075 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:58:47,091 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 15:58:47,206 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:01:43,841 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 835, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 182, in __init__
+    self.create_actions()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 254, in create_actions
+    QShortcut("Ctrl+Up", self, self.move_station_up)
+    ^^^^^^^^^
+NameError: name 'QShortcut' is not defined
+2025-12-05 16:08:25,877 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:08:25,885 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:08:25,948 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:16:13,264 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:16:13,282 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:16:13,347 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:19:37,103 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:19:37,111 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:19:37,177 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:21:19,450 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:21:19,458 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:21:19,526 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:21:49,859 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:21:49,866 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:21:49,924 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:58:23,878 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:58:23,890 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:58:23,986 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:59:03,483 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:59:13,483 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 16:59:23,475 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:02:15,566 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:02:15,572 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:02:15,634 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:14:52,384 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 936, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 182, in __init__
+    self.create_actions()
+    ~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 225, in create_actions
+    self.save_action.triggered.connect(self.save_config_and_restart_daemon)
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MainWindow' object has no attribute 'save_config_and_restart_daemon'. Did you mean: '_save_and_restart_daemon'?
+2025-12-05 17:16:12,165 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 933, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 192, in __init__
+    tabs.addTab(self.tab_schedule(), self.tr("Harmonogram"))
+                ~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 621, in tab_schedule
+    self.refresh_schedule_list()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 660, in refresh_schedule_list
+    item = QListWidgetItem(f"{days}: {rule['from']}–{rule['to']} → {rule['station']}")
+           ^^^^^^^^^^^^^^^
+NameError: name 'QListWidgetItem' is not defined. Did you mean: 'QTreeWidgetItem'?
+2025-12-05 17:17:41,094 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 953, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 199, in __init__
+    tabs.addTab(self.tab_settings(), self.tr("Ustawienia")) # New Settings Tab
+                ^^^^^^^^^^^^^^^^^
+AttributeError: 'MainWindow' object has no attribute 'tab_settings'. Did you mean: 'tab_stations'?
+2025-12-05 17:19:01,153 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 956, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 201, in __init__
+    tabs.addTab(self.tab_settings(), self.tr("Ustawienia")) # New Settings Tab
+                ^^^^^^^^^^^^^^^^^
+AttributeError: 'MainWindow' object has no attribute 'tab_settings'. Did you mean: 'tab_stations'?
+2025-12-05 17:19:58,244 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 999, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 201, in __init__
+    tabs.addTab(self.tab_settings(), self.tr("Ustawienia")) # New Settings Tab
+                ~~~~~~~~~~~~~~~~~^^
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 969, in tab_settings
+    apply_lang_btn.clicked.connect(self.apply_language_settings)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MainWindow' object has no attribute 'apply_language_settings'
+2025-12-05 17:23:44,687 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:23:44,698 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:23:44,781 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:24:04,438 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:24:04,443 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:24:04,500 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:31:41,833 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:31:41,839 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:31:41,890 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:34:56,357 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:34:56,363 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:34:56,414 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:36:55,272 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:36:55,278 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:36:55,280 - CRITICAL - Aplikacja GUI napotkała nieobsługiwany błąd.
+Traceback (most recent call last):
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 1051, in <module>
+    win = MainWindow()
+  File "/home/jaceks/.config/radio-scheduler/radio-scheduler-gui.py", line 208, in __init__
+    self.retranslate_ui()
+    ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'MainWindow' object has no attribute 'retranslate_ui'
+2025-12-05 17:45:06,349 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:45:06,354 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:45:06,404 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:46:21,539 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:46:21,545 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:46:21,597 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:48:23,897 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:48:23,903 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:48:23,952 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:50:16,839 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:50:16,844 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:50:16,905 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:53:16,223 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:53:16,231 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:53:16,288 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:55:59,706 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:55:59,711 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 17:55:59,761 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:02:49,383 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:02:49,389 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:02:49,448 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:07:09,346 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:07:09,351 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:07:09,404 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:09:54,041 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:09:54,054 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:09:54,127 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:12:32,805 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:12:32,811 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:12:32,869 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:16:23,168 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:16:23,173 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:16:23,225 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:20:33,946 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:20:33,952 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:20:34,004 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:21:46,691 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:21:46,699 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:21:46,766 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:23:59,630 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:23:59,638 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:23:59,694 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:27:17,184 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:27:17,190 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:27:17,251 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:29:07,677 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:29:07,682 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:29:07,738 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:29:42,568 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:29:42,578 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:29:42,638 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:30:51,236 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:30:51,242 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:30:51,301 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:30:51,360 - ERROR - Error updating 'About' tab content: stdout and stderr arguments may not be used with capture_output.
+2025-12-05 18:31:52,137 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:31:52,143 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:31:52,199 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:34:32,806 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:34:32,814 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:34:32,877 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:36:06,459 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:36:06,467 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:36:06,533 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:39:02,012 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:39:02,019 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:39:02,076 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:40:39,972 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:40:39,977 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:40:40,037 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:40:50,470 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:44:53,026 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:44:53,031 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:44:53,107 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:45:03,469 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:45:13,468 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:45:23,469 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:45:33,473 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:45:43,469 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:45:53,478 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:46:03,468 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:46:13,473 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:46:23,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:46:33,467 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:46:43,474 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:46:53,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:47:03,476 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:47:13,486 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:47:23,475 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:47:33,475 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:47:43,476 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:47:53,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:48:03,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:48:13,478 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:48:23,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:48:33,475 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:48:43,476 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:48:53,476 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:03,476 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:13,475 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:23,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:33,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:43,476 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:47,811 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:47,821 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:49:53,467 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:59:36,415 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:59:36,421 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 18:59:36,497 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 19:56:18,950 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 19:56:18,956 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 19:56:19,011 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 19:59:02,733 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 19:59:02,739 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 19:59:02,795 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:06:31,428 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:06:31,435 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:06:31,495 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:07:26,826 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:07:26,832 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:07:26,892 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:07:58,279 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:07:58,285 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:07:58,341 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:09:55,981 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:09:55,987 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:09:56,045 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:12:24,728 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:12:24,736 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:12:24,793 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:14:25,213 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:14:25,219 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:14:25,302 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:14:30,769 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:14:30,776 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:14:35,471 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:18:33,398 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:18:33,403 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:18:33,481 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:19:23,477 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:22:32,982 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:22:32,989 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+
+2025-12-05 20:22:33,070 - ERROR - Nie można przetworzyć głośności z wyjścia MPC: volume: n/a
+

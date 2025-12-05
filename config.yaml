@@ -1,0 +1,85 @@
+stations:
+- name: Polskie Radio Program 1
+  url: http://stream3.polskieradio.pl:8950
+  genre: pop
+  favorite: false
+- name: Polskie Radio Program 2
+  url: http://stream3.polskieradio.pl:8952
+  genre: classic
+  favorite: true
+- name: Polskie Radio Program 3
+  url: http://mp3.polskieradio.pl:8904
+  genre: pop
+  favorite: false
+- name: RMF FM
+  url: http://rmfstream1.interia.pl:8000/rmf_fm
+  genre: pop
+  favorite: true
+- name: RMF Classic
+  url: http://rmfstream1.interia.pl:8000/rmf_classic
+  genre: classic
+  favorite: true
+- name: RMF 24
+  url: http://rs201-krk.rmfstream.pl/RMF24
+  genre: news
+  favorite: false
+- name: Radio Nowy Świat
+  url: https://stream.rcs.revma.com/ye5kgh5guy8uv
+  genre: chillout
+  favorite: false
+- favorite: false
+  genre: rock
+  name: Antyradio
+  url: https://an05.cdn.eurozet.pl/ant-waw.mp3
+- name: TOK FM
+  url: https://pl-play.adtonos.com/tok-fm
+  genre: news
+  favorite: false
+schedule:
+  default: RMF Classic
+  weekly:
+  - days:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    from: 06:00
+    to: 09:00
+    station: TOK FM
+  - days:
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    from: 09:00
+    to: '17:00'
+    station: Polskie Radio Program 2
+  - days:
+    - sat
+    - sun
+    from: 00:00
+    to: '23:59'
+    station: Polskie Radio Program 2
+  news_breaks:
+    enabled: true
+    use_advanced: false
+    simple:
+      station: RMF 24
+      from: 00:00
+      to: '23:00'
+      interval_minutes: 60
+      duration_minutes: 8
+    advanced: []
+    start_minute_offset: 0
+language: pl
+shortcuts:
+  save: Ctrl+S
+  quit: Ctrl+Q
+  add_station: Ctrl+N
+  edit_station: Ctrl+E
+  delete_station: Del
+  play_station: F5
+  move_up: Ctrl+Up
+  move_down: Ctrl+Down
