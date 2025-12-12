@@ -1,39 +1,39 @@
 # RadioScheduler
 
-RadioScheduler to aplikacja desktopowa do planowania i automatycznego odtwarzania internetowych stacji radiowych. Składa się z demona działającego w tle oraz interfejsu graficznego (GUI) do zarządzania.
+RadioScheduler is a desktop application for scheduling and automatically playing internet radio stations. It consists of a background daemon and a graphical user interface (GUI) for management.
 
 
-## Główne funkcje
+## Main Features
 
-*   **Graficzny interfejs użytkownika**: Intuicyjne zarządzanie stacjami, harmonogramem i ustawieniami.
-*   **Demon działający w tle**: Zapewnia nieprzerwane odtwarzanie zgodnie z harmonogramem, nawet po zamknięciu GUI.
-*   **Zaawansowany harmonogram**: Definiuj reguły odtwarzania dla konkretnych dni tygodnia i przedziałów czasowych.
-*   **Przerwy na wiadomości**: Automatyczne przełączanie na stację informacyjną o określonych porach.
-*   **Integracja z zasobnikiem systemowym (tray)**: Szybki dostęp do ulubionych stacji, kontrola głośności i statusu odtwarzania.
-*   **Wsparcie dla wielu języków**: Interfejs dostępny w języku polskim i angielskim.
-*   **Personalizacja**: Możliwość edycji skrótów klawiszowych.
-*   **Import i eksport konfiguracji**: Łatwe tworzenie kopii zapasowych i przenoszenie ustawień.
+*   **Graphical User Interface**: Intuitive management of stations, schedules, and settings.
+*   **Background Daemon**: Ensures uninterrupted playback according to the schedule, even after the GUI is closed.
+*   **Advanced Scheduling**: Define playback rules for specific days of the week and time ranges.
+*   **News Breaks**: Automatically switch to a news station at specified times.
+*   **System Tray Integration**: Quick access to favorite stations, volume control, and playback status.
+*   **Multi-language Support**: The interface is available in Polish and English.
+*   **Customization**: Ability to edit keyboard shortcuts.
+*   **Configuration Import and Export**: Easily back up and transfer settings.
 
-## Wymagania
+## Requirements
 
 *   **Python 3.8+**
-*   Biblioteki Pythona: `PySide6`, `PyYAML`
-*   **Music Player Daemon (MPD)** oraz `mpc` (klient wiersza poleceń)
+*   Python libraries: `PySide6`, `PyYAML`
+*   **Music Player Daemon (MPD)** and `mpc` (command-line client)
 
-## Instalacja
+## Installation
 
-1.  **Sklonuj repozytorium:**
+1.  **Clone the repository:**
     ```bash
     git clone https://github.com/Daszkan/radio-scheduler.git
     cd radio-scheduler
     ```
 
-2.  **Zainstaluj zależności Pythona:**
+2.  **Install Python dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
 
-3.  **Zainstaluj MPD i MPC:**
+3.  **Install MPD and MPC:**
 
     *   **Debian / Ubuntu:**
         ```bash
@@ -48,15 +48,15 @@ RadioScheduler to aplikacja desktopowa do planowania i automatycznego odtwarzani
         sudo dnf install mpd mpc
         ```
 
-4.  **Skonfiguruj MPD:**
-    Upewnij się, że masz podstawową konfigurację MPD w swoim katalogu domowym, np. w `~/.config/mpd/mpd.conf`. Aplikacja posiada wbudowany edytor tego pliku. MPD musi być uruchomiony, aby aplikacja działała poprawnie.
+4.  **Configure MPD:**
+    Ensure you have a basic MPD configuration in your home directory, e.g., at `~/.config/mpd/mpd.conf`. The application has a built-in editor for this file. MPD must be running for the application to work correctly.
     ```bash
     mpd
     ```
 
-## Użycie
+## Usage
 
-Aby uruchomić interfejs graficzny, wykonaj polecenie w głównym katalogu projektu:
+To launch the graphical interface, run the following command in the main project directory:
 
 ```bash
 python radio-scheduler-gui.py

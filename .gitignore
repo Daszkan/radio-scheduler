@@ -1,6 +1,7 @@
 # Pliki generowane przez Pythona
-__pycache__/
+__pycache__/*
 *.pyc
+config.yaml
 
 # Pliki generowane przez narzędzia do budowania
 dist/
