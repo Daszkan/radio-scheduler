@@ -83,3 +83,4 @@ shortcuts:
   play_station: F5
   move_up: Ctrl+Up
   move_down: Ctrl+Down
+hide_on_startup: false

@@ -38,11 +38,14 @@ class MPCController:
     def get_volume(self):
         result = self._run_command(["mpc", "volume"])
         if result and result.stdout:
+            # Check for connection error even if stdout is present
+            if result.returncode != 0 and "connection" in result.stderr.lower():
+                return None
             try:
                 return int(result.stdout.split()[-1].strip("%"))
             except (ValueError, IndexError):
                 logger.error(f"Nie można przetworzyć głośności z wyjścia MPC: {result.stdout}")
-        return 50  # Domyślna głośność
+        return None # Zwróć None, jeśli nie można pobrać głośności
 
     def set_volume(self, volume):
         volume = max(0, min(100, volume))

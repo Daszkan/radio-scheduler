@@ -16,7 +16,7 @@ from typing import Dict, Any, List, Optional
 CONFIG_PATH = Path.home() / ".config/radio-scheduler/config.yaml"
 LOG_PATH = Path.home() / ".config/radio-scheduler/radio-scheduler.log"
 MANUAL_OVERRIDE_LOCK = Path.home() / ".config/radio-scheduler/manual_override.lock"
-NO_NEWS_TODAY = Path.home() / ".config/radio-scheduler/no-news-today"
+NO_NEWS_TODAY_LOCK = Path.home() / ".config/radio-scheduler/no-news-today"
 
 # Konfiguracja logowania
 logging.basicConfig(
@@ -59,12 +59,12 @@ def main():
         target_station_name = None
         
         # Sprawdź flagę "bez newsów na dziś"
-        no_news = NO_NEWS_TODAY.exists() and NO_NEWS_TODAY.read_text().strip() == str(now.date())
+        no_news_today = NO_NEWS_TODAY_LOCK.exists() and NO_NEWS_TODAY_LOCK.read_text().strip() == str(now.date())
 
         # News breaks (advanced first)
         news_cfg = sched.get("news_breaks", {})
         news_played_this_cycle = False
-        if not no_news and news_cfg.get("enabled", True):
+        if not no_news_today and news_cfg.get("enabled", True):
             offset = news_cfg.get("start_minute_offset", 0)
             if news_cfg.get("use_advanced", False):
                 for rule in news_cfg.get("advanced", []) or []:

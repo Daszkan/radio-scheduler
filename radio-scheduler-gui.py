@@ -7,7 +7,8 @@ import sys
 import yaml
 import subprocess
 from pathlib import Path
-from datetime import time
+from datetime import time, datetime
+from logging.handlers import RotatingFileHandler
 from collections import defaultdict
 import logging, os
 
@@ -57,15 +58,21 @@ from PySide6.QtGui import QAction, QDesktopServices, QIcon, QFont, QKeySequence,
 # --- Global Paths and Configuration ---
 CONFIG_PATH = Path.home() / ".config/radio-scheduler/config.yaml"
 LOG_PATH = Path.home() / ".config/radio-scheduler/radio-scheduler-gui.log"
-DAEMON_PATH = Path.home() / ".config/radio-scheduler/radio-scheduler.py"
+DAEMON_PATH = Path(__file__).parent / "radio-scheduler.py"
 MANUAL_OVERRIDE_LOCK = Path.home() / ".config/radio-scheduler/manual_override.lock"
+NO_NEWS_TODAY_LOCK = Path.home() / ".config/radio-scheduler/no-news-today"
 ICON_PATH = Path(__file__).parent / "app_icon.png"
 
-logging.basicConfig(
-    filename=LOG_PATH,
-    level=logging.ERROR,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+# Konfiguracja logowania z rotacją plików
+LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+log_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+log_handler = RotatingFileHandler(LOG_PATH, maxBytes=1024*1024, backupCount=5, encoding='utf-8')
+log_handler.setFormatter(log_formatter)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO) # Zmieniono poziom logowania na INFO
+logger.addHandler(log_handler)
+
 DEFAULT_ICON = QStyle.StandardPixmap.SP_MediaPlay # Corrected enum usage
 MANUAL_ICON = QStyle.StandardPixmap.SP_MediaSeekForward # Corrected enum usage
 
@@ -87,11 +94,32 @@ def play_now(station):
         if not mpc.play_url(station["url"]):
             raise Exception("MPC command failed, check mpc_controller.log")
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        logging.error(f"Błąd podczas ręcznego odtwarzania stacji {station.get('name', '')}: {e}")
+        logger.error(f"Błąd podczas ręcznego odtwarzania stacji {station.get('name', '')}: {e}")
         # This function is called from outside MainWindow, so we can't use self.translator
         # A simple message box is sufficient.
         QMessageBox.critical(None, "Playback Error", f"Could not play station. Check logs:\n{LOG_PATH}")
 
+def find_mpd_conf_path():
+    """
+    Searches for the mpd.conf file in common user locations in order of precedence.
+    1. $XDG_CONFIG_HOME/mpd/mpd.conf (e.g., ~/.config/mpd/mpd.conf)
+    2. ~/.mpd/mpd.conf
+    3. ~/.mpdconf
+    Returns the first path found, or the default XDG path if none exist.
+    """
+    home = Path.home()
+    # Path 1: XDG standard
+    xdg_config_home = Path(os.environ.get("XDG_CONFIG_HOME", home / ".config"))
+    path1 = xdg_config_home / "mpd/mpd.conf"
+    # Other common paths
+    path2 = home / ".mpd/mpd.conf"
+    path3 = home / ".mpdconf"
+
+    for path in [path1, path2, path3]:
+        if path.exists():
+            return path
+    # If no file is found, return the preferred (XDG) path for creation.
+    return path1
 class Translator:
     def __init__(self, lang='pl'):
         self.lang = lang
@@ -205,7 +233,7 @@ class AboutTab(QWidget):
         header_layout.addWidget(icon_label)
 
         title_layout = QVBoxLayout()
-        self.app_name_label = QLabel("RadioScheduler v1.0")
+        self.app_name_label = QLabel("RadioScheduler v1.0.1")
         self.app_name_label.setFont(QFont("Arial", 20, QFont.Bold))
         title_layout.addWidget(self.app_name_label)
         header_layout.addLayout(title_layout)
@@ -312,6 +340,7 @@ class AboutTab(QWidget):
             self.mpd_status_label.setText(self.translator.tr("mpd_status_active"))
             self.mpd_status_icon.setPixmap(self.style().standardIcon(QStyle.SP_DialogApplyButton).pixmap(16, 16))
             self.stats_group.setVisible(True)
+            self.instr_group.setChecked(False)
             self.instr_group.setVisible(False) # Hide instructions if MPD is running
 
             try:
@@ -328,12 +357,13 @@ class AboutTab(QWidget):
                     self.mpd_uptime_label.setText("N/A")
 
             except Exception as e:
-                logging.error(f"Error updating 'About' tab content: {e}")
+                logger.error(f"Error updating 'About' tab content: {e}")
                 self.stats_group.setVisible(False)
         else:
             self.mpd_status_label.setText(self.translator.tr("mpd_status_inactive"))
             self.mpd_status_icon.setPixmap(self.style().standardIcon(QStyle.SP_DialogCancelButton).pixmap(16, 16))
             self.stats_group.setVisible(False)
+            self.instr_group.setChecked(True)
             self.instr_group.setVisible(True) # Show instructions if MPD is not running
 
 class MainWindow(QMainWindow):
@@ -375,6 +405,11 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.about_tab, "")
 
         self.setCentralWidget(self.tabs)
+
+        # Odroczone pierwsze odświeżenie UI, aby uniknąć problemów z timingiem przy starcie
+        QTimer.singleShot(0, self.initial_ui_refresh)
+
+        # Tłumaczenia są ładowane na końcu, po utworzeniu wszystkich widgetów
         self.retranslate_ui()
 
     def closeEvent(self, e):
@@ -453,6 +488,10 @@ class MainWindow(QMainWindow):
         self.set_as_default_action.triggered.connect(self.set_as_default_station)
         self.addAction(self.set_as_default_action)
 
+        self.no_news_today_action = QAction(self)
+        self.no_news_today_action.setCheckable(True)
+        self.no_news_today_action.triggered.connect(self.toggle_no_news_today)
+
         self.restart_daemon_action = QAction(self)
         self.restart_daemon_action.triggered.connect(self.restart_scheduler_daemon)
         self.addAction(self.restart_daemon_action)
@@ -496,44 +535,73 @@ class MainWindow(QMainWindow):
     def build_tray_menu(self):
         """Builds or rebuilds the context menu for the system tray icon."""
         menu = QMenu()
+        style = QApplication.style() # Use app style, it's safer
+        current_url = self.last_known_song # Use buffered value
         favorites = [s for s in self.config.get("stations", []) if s.get("favorite")]
 
-        menu.addAction(self.translator.tr("now_playing", current=mpc.get_current())).setEnabled(False)
+        self.tray_now_playing_action = menu.addAction(self.translator.tr("now_playing", current="..."))
+        self.tray_now_playing_action.setIcon(style.standardIcon(QStyle.SP_MediaPlay))
+        self.tray_now_playing_action.setEnabled(False)
         menu.addSeparator() # Separator for favorites
 
         if favorites:
             for s in favorites:
-                a = menu.addAction(f"★ {s['name']}")
+                a = menu.addAction(s['name'])
+                a.setIcon(style.standardIcon(QStyle.SP_MediaPlay)) # Użyj istniejącej ikony
                 a.triggered.connect(lambda _, x=s: (play_now(x), self.update_return_to_schedule_button()))
+                if s['url'] == current_url:
+                    font = a.font()
+                    font.setBold(True)
+                    a.setFont(font)
         else:
-            menu.addAction(self.translator.tr("no_favorites")).setEnabled(False)
+            no_fav_action = menu.addAction(self.translator.tr("no_favorites"))
+            no_fav_action.setIcon(style.standardIcon(QStyle.SP_MediaPlay)) # Użyj istniejącej ikony
+            no_fav_action.setEnabled(False)
 
         menu.addSeparator() # Separator for volume
 
-        vol_menu = menu.addMenu(self.translator.tr("volume_menu", volume=mpc.get_volume()))
+        self.tray_vol_menu = menu.addMenu(self.translator.tr("volume_menu", volume=0))
+        self.tray_vol_menu.setIcon(style.standardIcon(QStyle.SP_MediaVolume))
         for v in range(0, 101, 5):
-            a = vol_menu.addAction(f"{v:3}%")
+            a = self.tray_vol_menu.addAction(f"{v:3}%")
             a.triggered.connect(lambda _, vol=v: (mpc.set_volume(vol), self.build_tray_menu()))
 
         menu.addSeparator()
-        
+
         if MANUAL_OVERRIDE_LOCK.exists():
             return_action = menu.addAction(self.translator.tr("return_to_schedule"))
+            return_action.setIcon(style.standardIcon(QStyle.SP_BrowserReload))
             return_action.triggered.connect(self.return_to_schedule)
             menu.addSeparator()
-        
+
+        # Opcja wyłączenia wiadomości
+        is_disabled = NO_NEWS_TODAY_LOCK.exists() and NO_NEWS_TODAY_LOCK.read_text().strip() == str(datetime.now().date())
+        self.no_news_today_action.setChecked(is_disabled)
+        menu.addAction(self.no_news_today_action)
+
+        self.restart_daemon_action.setIcon(style.standardIcon(QStyle.SP_BrowserReload))
         menu.addAction(self.restart_daemon_action)
         menu.addSeparator() # Separator before show/quit
-        menu.addAction(self.translator.tr("show_editor"), self.show)
-        menu.addAction(self.translator.tr("exit"), clear_and_exit)
+        menu.addAction(style.standardIcon(QStyle.SP_DesktopIcon), self.translator.tr("show_editor"), self.show)
+        menu.addAction(style.standardIcon(QStyle.SP_DialogCloseButton), self.translator.tr("exit"), clear_and_exit)
+        
         self.tray.setContextMenu(menu)
-        self.update_tray_tooltip()
+        self.update_dynamic_tray_elements() # Initial update
+        # Przetłumacz nową akcję po jej utworzeniu
+        self.no_news_today_action.setText(self.translator.tr("disable_news_today"))
 
     def update_tray_tooltip(self):
         """Updates the tooltip for the tray icon with current status."""
         current = mpc.get_current()
         vol = mpc.get_volume()
         self.tray.setToolTip(f"RadioScheduler\n{self.translator.tr('now_playing', current=current)}\n{self.translator.tr('volume_menu', volume=vol)}")
+    
+    def update_dynamic_tray_elements(self):
+        """Updates parts of the tray menu that change, like volume and current song."""
+        if hasattr(self, 'tray_vol_menu'):
+            self.tray_vol_menu.setTitle(self.translator.tr("volume_menu", volume=mpc.get_volume() or 0))
+        if hasattr(self, 'tray_now_playing_action'):
+            self.tray_now_playing_action.setText(self.translator.tr("now_playing", current=mpc.get_current()))
 
     def on_timer_tick(self):
         """Periodic timer handler to refresh dynamic UI elements."""
@@ -541,14 +609,22 @@ class MainWindow(QMainWindow):
         # Odświeżaj tylko, jeśli coś się zmieniło
         if current_song_url != self.last_known_song:
             self.last_known_song = current_song_url
-            self.update_tray_tooltip()
             self.update_playing_station_in_tree() # Użyj nowej, wydajnej metody
             self.update_tray_icon()
 
+        # Zawsze odświeżaj dynamiczne elementy, które mogły się zmienić (głośność, status)
+        self.update_tray_tooltip()
+        self.update_dynamic_tray_elements()
+
         # Odświeżaj zakładkę "About" i metadane utworu tylko, gdy okno jest widoczne
         if self.isVisible():
-            self.about_tab.update_content()
-            self.now_playing_label.setText(mpc.get_current()) # type: ignore # Aktualizuj etykietę
+            self.initial_ui_refresh() # Użyj tej samej funkcji do odświeżania widocznych elementów
+
+    def initial_ui_refresh(self):
+        """Refreshes UI elements that depend on external state (like MPD). Called once at start and then by timer."""
+        self.about_tab.update_content()
+        self.update_volume_slider_status()
+        self.now_playing_label.setText(self.translator.tr("now_playing", current=mpc.get_current()))
 
     def show(self):
         super().show()
@@ -577,7 +653,8 @@ class MainWindow(QMainWindow):
                 },
             },
             "language": "pl", # Default language
-            "shortcuts": default_shortcuts # Default shortcuts
+            "shortcuts": default_shortcuts, # Default shortcuts
+            "hide_on_startup": False # New option
 
         }
         if not CONFIG_PATH.exists():
@@ -595,7 +672,7 @@ class MainWindow(QMainWindow):
                 default['shortcuts'].update(user_config['shortcuts'])
 
         except Exception as e:
-            logging.critical(f"Błąd odczytu pliku konfiguracyjnego: {e}", exc_info=True)
+            logger.critical(f"Błąd odczytu pliku konfiguracyjnego: {e}", exc_info=True)
             QMessageBox.critical(self, self.translator.tr("critical_error"), self.translator.tr("config_load_error", e=e))
         return default
 
@@ -614,6 +691,7 @@ class MainWindow(QMainWindow):
         self.remove_from_favorites_action.setText(self.translator.tr("remove_from_favorites"))
         self.set_as_default_action.setText(self.translator.tr("set_as_default"))
         self.restart_daemon_action.setText(self.translator.tr("restart_daemon"))
+        self.no_news_today_action.setText(self.translator.tr("disable_news_today"))
 
         self.tabs.setTabText(0, self.translator.tr("stations_tab_title"))
         self.tabs.setTabText(1, self.translator.tr("schedule_tab_title"))
@@ -634,7 +712,16 @@ class MainWindow(QMainWindow):
     def tab_stations(self):
         """Creates the 'Stations' tab widget."""
         w = QWidget()
-        l = QHBoxLayout(w)
+        main_layout = QHBoxLayout(w)
+
+        # Lewa strona z filtrem i drzewem
+        left_vbox = QVBoxLayout()
+
+        self.station_filter_input = QLineEdit()
+        self.station_filter_input.setPlaceholderText(self.translator.tr("filter_placeholder"))
+        self.station_filter_input.textChanged.connect(self.filter_stations_tree)
+        left_vbox.addWidget(self.station_filter_input)
+
         self.tree = QTreeWidget()
         self.tree.setHeaderLabels([self.translator.tr("stations_tab_title")])
         self.tree.header().setVisible(False)
@@ -643,7 +730,8 @@ class MainWindow(QMainWindow):
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.show_station_context_menu)
         self.refresh_tree()
-        l.addWidget(self.tree, 3)
+        left_vbox.addWidget(self.tree)
+        main_layout.addLayout(left_vbox, 3)
 
         btns = QVBoxLayout()
         add = QPushButton(self.translator.tr("add")); add.clicked.connect(self.add_station_action.trigger)
@@ -670,10 +758,11 @@ class MainWindow(QMainWindow):
         self.return_to_schedule_btn.setStyleSheet("background-color: #f44336; color: white;")
 
         volume_slider = QSlider(Qt.Horizontal)
-        volume_slider.setRange(0, 100)
-        volume_slider.setValue(mpc.get_volume()) # Initial volume
-        volume_slider.valueChanged.connect(mpc.set_volume)
-        volume_label = QLabel(self.translator.tr("volume"))
+        self.volume_slider = volume_slider
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.valueChanged.connect(mpc.set_volume)
+        self.volume_label = QLabel(self.translator.tr("volume"))
+        self.update_volume_slider_status()
         self.tree.setFocus() # Ustaw fokus na drzewie, aby skróty od razu działały
 
         # Przycisk Zastosuj dla stacji
@@ -691,15 +780,49 @@ class MainWindow(QMainWindow):
         btns.addStretch()
         btns.addWidget(self.apply_stations_btn)
         btns.addSpacing(10)
-        btns.addWidget(volume_label)
-        btns.addWidget(volume_slider)
+        btns.addWidget(self.volume_label)
+        btns.addWidget(self.volume_slider)
 
         # Etykieta na aktualnie grany utwór
-        self.now_playing_label = QLabel(self.translator.tr("now_playing", current=mpc.get_current()))
+        self.now_playing_label = QLabel(self.translator.tr("now_playing", current="..."))
         self.now_playing_label.setWordWrap(True)
         btns.addWidget(self.now_playing_label)
-        l.addLayout(btns, 1)
+        main_layout.addLayout(btns, 1)
         return w
+
+    def filter_stations_tree(self):
+        """Filters the station tree based on the text in the filter input."""
+        filter_text = self.station_filter_input.text().lower()
+        root = self.tree.invisibleRootItem()
+        for i in range(root.childCount()):
+            genre_item = root.child(i)
+            # Check if the genre name itself matches
+            genre_matches = filter_text in genre_item.text(0).lower()
+            any_child_matches = False
+
+            # Iterate through stations within the genre
+            for j in range(genre_item.childCount()):
+                station_item = genre_item.child(j)
+                station_matches = filter_text in station_item.text(0).lower()
+                # Stacja powinna być widoczna, jeśli jej nazwa pasuje LUB nazwa jej gatunku pasuje
+                station_item.setHidden(not (station_matches or genre_matches))
+                if station_matches:
+                    any_child_matches = True
+            
+            # Gatunek powinien być widoczny, jeśli jego nazwa pasuje LUB którakolwiek z jego stacji pasuje
+            genre_item.setHidden(not (genre_matches or any_child_matches))
+
+    def update_volume_slider_status(self):
+        """Disables the volume slider and updates its label if MPD is not running."""
+        volume = mpc.get_volume()
+        if volume is not None:
+            self.volume_slider.setEnabled(True)
+            self.volume_label.setText(self.translator.tr("volume"))
+            if not self.volume_slider.isSliderDown():
+                self.volume_slider.setValue(volume)
+        else:
+            self.volume_slider.setEnabled(False)
+            self.volume_label.setText(f'{self.translator.tr("volume")} ({self.translator.tr("mpd_status_inactive")})')
 
     def update_playing_station_in_tree(self):
         """Efficiently updates the currently playing station in the tree without a full rebuild."""
@@ -724,22 +847,35 @@ class MainWindow(QMainWindow):
     def refresh_tree(self, mark_dirty=False):
         """Refreshes the station tree view, optionally marking the state as dirty (needs saving)."""
         self.tree.clear()
-        current_url = mpc.get_current_url()
+        current_url = self.last_known_song
+        default_station_name = self.schedule.get("default")
+
         groups = defaultdict(list)
         for s in self.stations: # Use self.stations directly
             g = s.get("genre") or self.translator.tr("genre_none")
             groups[g].append(s)
+
         for genre, stations in sorted(groups.items()):
             parent = QTreeWidgetItem(self.tree, [genre])
             parent.setFlags(parent.flags() & ~Qt.ItemIsSelectable)
             for s in stations:
-                name = f"★ {s['name']}" if s.get("favorite") else s["name"]
-                item = QTreeWidgetItem(parent, [name])
+                is_playing = s['url'] == current_url
+                is_favorite = s.get("favorite", False)
+                is_default = s['name'] == default_station_name
+
+                display_name = s['name']
+                if is_favorite:
+                    display_name = f"★ {display_name}"
+                if is_default:
+                    display_name = f"{display_name} ({self.translator.tr('default_station_indicator')})"
+
+                item = QTreeWidgetItem(parent, [display_name])
                 item.setData(0, Qt.UserRole, s)
-                if s['url'] == current_url:
-                    font = item.font(0)
-                    font.setBold(True)
-                    item.setFont(0, font)
+                font = item.font(0)
+                font.setBold(is_playing)
+                font.setItalic(is_default)
+                item.setFont(0, font)
+                if is_playing:
                     item.setIcon(0, self.style().standardIcon(QStyle.SP_MediaPlay))
         self.tree.expandAll()
         if mark_dirty:
@@ -796,9 +932,8 @@ class MainWindow(QMainWindow):
 
         station_name = station.get("name")
         self.schedule["default"] = station_name
-        # Zmiana domyślnej stacji powinna być zapisana z harmonogramem
-        # Zamiast natychmiastowego zapisu, można by tu ustawić flagę
-        self.save_schedule() # Na razie zostawiamy zapis, ale idealnie byłoby to zmienić
+        self.refresh_tree(mark_dirty=True)
+        self.refresh_default_station_combo()
 
     def play_from_tree(self):
         """Plays the currently selected station from the tree."""
@@ -819,6 +954,14 @@ class MainWindow(QMainWindow):
         self.update_return_to_schedule_button()
         self.build_tray_menu() # Odśwież menu w trayu
         self.update_tray_icon()
+
+    def toggle_no_news_today(self, checked):
+        """Creates or removes the lock file to disable news for the current day."""
+        if checked:
+            today_str = str(datetime.now().date())
+            NO_NEWS_TODAY_LOCK.write_text(today_str, encoding="utf-8")
+        else:
+            NO_NEWS_TODAY_LOCK.unlink(missing_ok=True)
 
     def update_return_to_schedule_button(self):
         """Shows or hides the 'Return to Schedule' button based on the manual override lock."""
@@ -892,13 +1035,23 @@ class MainWindow(QMainWindow):
         w = QWidget()
         l = QHBoxLayout(w)
 
-        # Lewa strona - lista reguł
+        # Lewa strona - tabela reguł
         left_vbox = QVBoxLayout() # Left side for schedule rules
         left_vbox.addWidget(QLabel(self.translator.tr("schedule_rules")))
-        self.schedule_list = QListWidget()
-        self.schedule_list.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.schedule_table = QTableWidget()
+        self.schedule_table.setColumnCount(3)
+        self.schedule_table.setHorizontalHeaderLabels([
+            self.translator.tr("days"),
+            self.translator.tr("time_range"),
+            self.translator.tr("station")
+        ])
+        self.schedule_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.schedule_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.schedule_table.verticalHeader().setVisible(False)
+        self.schedule_table.horizontalHeader().setStretchLastSection(True)
+        self.schedule_table.setAlternatingRowColors(True)
         self.refresh_schedule_list()
-        left_vbox.addWidget(self.schedule_list)
+        left_vbox.addWidget(self.schedule_table)
 
         # Domyślna stacja
         default_station_form = QFormLayout()
@@ -934,17 +1087,23 @@ class MainWindow(QMainWindow):
 
     def refresh_schedule_list(self):
         """Refreshes the list of schedule rules."""
-        self.schedule_list.clear()
+        self.schedule_table.setRowCount(0)
         day_map = {
             "mon": self.translator.tr("day_mon_short"), "tue": self.translator.tr("day_tue_short"),
             "wed": self.translator.tr("day_wed_short"), "thu": self.translator.tr("day_thu_short"),
             "fri": self.translator.tr("day_fri_short"), "sat": self.translator.tr("day_sat_short"), "sun": self.translator.tr("day_sun_short")
         }
         for i, rule in enumerate(self.schedule.get("weekly", [])):
+            row_position = self.schedule_table.rowCount()
+            self.schedule_table.insertRow(row_position)
+
             days = ", ".join([day_map.get(d, d) for d in rule["days"]])
-            item = QListWidgetItem(f"{days}: {rule['from']}–{rule['to']} → {rule['station']}")
-            item.setData(Qt.UserRole, i)
-            self.schedule_list.addItem(item)
+            days_item = QTableWidgetItem(days)
+            days_item.setData(Qt.UserRole, i) # Store index in the first column's item
+
+            self.schedule_table.setItem(row_position, 0, days_item)
+            self.schedule_table.setItem(row_position, 1, QTableWidgetItem(f"{rule['from']}–{rule['to']}"))
+            self.schedule_table.setItem(row_position, 2, QTableWidgetItem(rule['station']))
 
     def add_schedule_rule(self):
         """Opens a dialog to add a new schedule rule."""
@@ -957,9 +1116,10 @@ class MainWindow(QMainWindow):
 
     def edit_schedule_rule(self):
         """Opens a dialog to edit the selected schedule rule."""
-        item = self.schedule_list.currentItem()
-        if not item: return
-        idx = item.data(Qt.UserRole)
+        current_row = self.schedule_table.currentRow()
+        if current_row < 0: return
+        item = self.schedule_table.item(current_row, 0)
+        idx = item.data(Qt.UserRole) if item else -1
         rule = self.schedule["weekly"][idx]
         dlg = TimeRangeEditor(rule, self.tree, self)
         new_rule = dlg.get_rule()
@@ -970,10 +1130,11 @@ class MainWindow(QMainWindow):
 
     def delete_schedule_rule(self):
         """Deletes the selected schedule rule after confirmation."""
-        item = self.schedule_list.currentItem()
-        if not item: return
+        current_row = self.schedule_table.currentRow()
+        if current_row < 0: return
+        item = self.schedule_table.item(current_row, 0)
+        idx = item.data(Qt.UserRole) if item else -1
         if QMessageBox.question(self, self.translator.tr("delete_prompt"), self.translator.tr("delete_rule_prompt")) == QMessageBox.Yes:
-            idx = item.data(Qt.UserRole)
             del self.schedule["weekly"][idx]
             # Zmiana na zapis po kliknięciu przycisku
             self.refresh_schedule_list()
@@ -989,7 +1150,7 @@ class MainWindow(QMainWindow):
             # Optionally, show a temporary status message
             self.statusBar().showMessage(self.translator.tr("stations_saved_success"), 3000)
         except Exception as e:
-            logging.error(f"Błąd zapisu pliku konfiguracyjnego (tylko stacje): {e}")
+            logger.error(f"Błąd zapisu pliku konfiguracyjnego (tylko stacje): {e}")
             QMessageBox.critical(self, self.translator.tr("save_error"), self.translator.tr("config_save_error", e=e))
 
     def save_config_and_restart_daemon(self):
@@ -1007,7 +1168,7 @@ class MainWindow(QMainWindow):
             subprocess.run(["pkill", "-f", "radio-scheduler.py"], check=False) # Kill existing daemon
             subprocess.Popen([sys.executable, str(DAEMON_PATH)], start_new_session=True)
         except Exception as e:
-            logging.error(f"Błąd zapisu pliku konfiguracyjnego: {e}")
+            logger.error(f"Błąd zapisu pliku konfiguracyjnego: {e}")
             QMessageBox.critical(self, self.translator.tr("save_error"), self.translator.tr("config_save_error", e=e))
 
     def save_schedule(self):
@@ -1160,7 +1321,7 @@ class MainWindow(QMainWindow):
         w = QWidget()
         self.mpd_config_layout = QVBoxLayout(w)
 
-        self.mpd_conf_path = Path.home() / ".config/mpd/mpd.conf"
+        self.mpd_conf_path = find_mpd_conf_path()
 
         info_label = QLabel(self.translator.tr("editing_file", path=self.mpd_conf_path))
         info_label.setTextFormat(Qt.RichText)
@@ -1202,7 +1363,7 @@ class MainWindow(QMainWindow):
                                                   "# Możesz utworzyć podstawową konfigurację i zapisać plik.")
         except Exception as e:
             QMessageBox.critical(self, self.translator.tr("read_error"), self.translator.tr("mpd_conf_read_error", e=e))
-            logging.error(f"Błąd odczytu pliku mpd.conf: {e}")
+            logger.error(f"Błąd odczytu pliku mpd.conf: {e}")
 
     def save_mpd_config(self):
         """Saves the content of the text editor to the mpd.conf file."""
@@ -1213,7 +1374,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, self.translator.tr("saved"), self.translator.tr("mpd_conf_save_success", path=self.mpd_conf_path))
         except Exception as e:
             QMessageBox.critical(self, self.translator.tr("save_error"), self.translator.tr("mpd_conf_save_error", e=e))
-            logging.error(f"Błąd zapisu pliku mpd.conf: {e}")
+            logger.error(f"Błąd zapisu pliku mpd.conf: {e}")
 
     def restart_mpd(self):
         """Restarts the MPD service."""
@@ -1237,7 +1398,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(self, self.translator.tr("success"), self.translator.tr("mpd_restarted"))
         except Exception as e:
             QMessageBox.critical(self, self.translator.tr("critical_error"), self.translator.tr("mpd_critical_error", e=e))
-            logging.error(f"Błąd krytyczny podczas restartu MPD: {e}")
+            logger.error(f"Błąd krytyczny podczas restartu MPD: {e}")
 
     # === SETTINGS TAB ===
     def tab_settings(self):
@@ -1311,6 +1472,15 @@ class MainWindow(QMainWindow):
         autostart_layout.addWidget(QLabel(self.translator.tr("autostart_description")))
         
         layout.addWidget(autostart_group)
+        
+        # --- Other settings ---
+        other_group = QGroupBox(self.translator.tr("other_settings_title"))
+        other_layout = QVBoxLayout(other_group)
+        self.hide_on_startup_checkbox = QCheckBox(self.translator.tr("hide_on_startup_checkbox"))
+        self.hide_on_startup_checkbox.setChecked(self.config.get("hide_on_startup", False))
+        self.hide_on_startup_checkbox.stateChanged.connect(self.save_simple_settings)
+        other_layout.addWidget(self.hide_on_startup_checkbox)
+        layout.addWidget(other_group)
 
 
         layout.addStretch()
@@ -1374,7 +1544,7 @@ Categories=AudioVideo;Audio;Player;
 """
                 desktop_file_path.write_text(desktop_content, encoding="utf-8")
             except Exception as e:
-                logging.error(f"Error creating autostart file: {e}")
+                logger.error(f"Error creating autostart file: {e}")
         elif desktop_file_path.exists():
             desktop_file_path.unlink()
 
@@ -1446,15 +1616,27 @@ Categories=AudioVideo;Audio;Player;
                     QMessageBox.critical(self, self.translator.tr("import_error_title"),
                                          self.translator.tr("import_error_text", e=e))
 
+    def save_simple_settings(self):
+        """Saves simple boolean settings directly to the config file."""
+        self.config["hide_on_startup"] = self.hide_on_startup_checkbox.isChecked()
+        try:
+            with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                yaml.safe_dump(self.config, f, allow_unicode=True, sort_keys=False)
+            self.statusBar().showMessage(self.translator.tr("settings_saved"), 2000)
+        except Exception as e:
+            logger.error(f"Błąd zapisu prostych ustawień: {e}")
+            QMessageBox.critical(self, self.translator.tr("save_error"), self.translator.tr("config_save_error", e=e))
+
 app = QApplication(sys.argv)
 app.setQuitOnLastWindowClosed(False)
 if ICON_PATH.exists():
     app.setWindowIcon(QIcon(str(ICON_PATH)))
 
 def main():
+    logger.info("--- RadioScheduler GUI started ---")
     win = MainWindow()
     win.update_tray_icon()
-    if "--hidden" not in sys.argv:
+    if "--hidden" not in sys.argv and not win.config.get("hide_on_startup", False):
         win.show()
     sys.exit(app.exec())
 
@@ -1462,4 +1644,4 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        logging.critical("Aplikacja GUI napotkała nieobsługiwany błąd.", exc_info=True)
+        logger.critical("Aplikacja GUI napotkała nieobsługiwany błąd.", exc_info=True)
