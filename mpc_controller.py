@@ -12,6 +12,8 @@ LOG_PATH = Path.home() / ".config/radio-scheduler/mpc_controller.log"
 # Konfiguracja dedykowanego loggera dla tego modułu
 logger = logging.getLogger(__name__)
 if not logger.handlers:
+    # Ensure the directory exists
+    Path(LOG_PATH).parent.mkdir(parents=True, exist_ok=True)
     logger.setLevel(logging.ERROR)
     handler = logging.FileHandler(LOG_PATH)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
