@@ -62,12 +62,11 @@ To launch the graphical interface, run the following command in the main project
 python radio-scheduler-gui.py
 ```
 
-Demon harmonogramu (`radio-scheduler.py`) zostanie uruchomiony automatycznie w tle przy pierwszym starcie GUI.
+The scheduler daemon (`radio-scheduler.py`) will start automatically in the background when the GUI is first launched.
 
-## Konfiguracja
+## Configuration
 
-Wszystkie ustawienia aplikacji, w tym lista stacji i harmonogram, są przechowywane w pliku `~/.config/radio-scheduler/config.yaml`. Plik ten jest tworzony i zarządzany automatycznie przez interfejs graficzny.
+All application settings, including the station list and schedule, are stored in the `~/.config/radio-scheduler/config.yaml` file. This file is created and managed automatically by the graphical interface.
 
-## Licencja
-
-Ten projekt jest udostępniany na licencji MIT. Zobacz plik LICENSE, aby uzyskać więcej informacji.
+## License
+This project is licensed under the MIT License. See the LICENSE file for more information.
