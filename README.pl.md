@@ -10,6 +10,11 @@ RadioScheduler to aplikacja desktopowa do planowania i automatycznego odtwarzani
 *   **Zaawansowany harmonogram**: Definiuj reguły odtwarzania dla konkretnych dni tygodnia i przedziałów czasowych.
 *   **Przerwy na wiadomości**: Automatyczne przełączanie na stację informacyjną o określonych porach.
 *   **Integracja z zasobnikiem systemowym (tray)**: Szybki dostęp do ulubionych stacji, kontrola głośności i statusu odtwarzania.
+*   **Wyłącznik czasowy (Sleep Timer)**: Automatyczne zatrzymywanie odtwarzania po określonym czasie.
+*   **Import playlist**: Importowanie stacji z plików M3U/PLS.
+*   **Testowanie połączenia**: Weryfikacja adresów URL stacji bezpośrednio w edytorze.
+*   **Auto-wznawianie**: Automatyczny powrót do harmonogramu po okresie sterowania ręcznego.
+*   **Pełna kopia zapasowa**: Tworzenie archiwum ZIP z konfiguracją i logami.
 *   **Wsparcie dla wielu języków**: Interfejs dostępny w języku polskim i angielskim.
 *   **Personalizacja**: Możliwość edycji skrótów klawiszowych.
 *   **Import i eksport konfiguracji**: Łatwe tworzenie kopii zapasowych i przenoszenie ustawień.
@@ -48,7 +53,14 @@ RadioScheduler to aplikacja desktopowa do planowania i automatycznego odtwarzani
         sudo dnf install mpd mpc
         ```
 
-4.  **Skonfiguruj MPD:**
+4.  **Uruchom skrypt instalacyjny (Opcjonalnie):**
+    Skrypt ten instaluje zależności Pythona i tworzy skróty na pulpicie.
+    ```bash
+    chmod +x install.sh
+    ./install.sh
+    ```
+
+5.  **Skonfiguruj MPD:**
     Upewnij się, że masz podstawową konfigurację MPD w swoim katalogu domowym, np. w `~/.config/mpd/mpd.conf`. Aplikacja posiada wbudowany edytor tego pliku. MPD musi być uruchomiony, aby aplikacja działała poprawnie.
     ```bash
     mpd

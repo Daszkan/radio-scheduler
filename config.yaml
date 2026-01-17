@@ -84,3 +84,4 @@ shortcuts:
   move_up: Ctrl+Up
   move_down: Ctrl+Down
 hide_on_startup: false
+auto_resume_minutes: 0

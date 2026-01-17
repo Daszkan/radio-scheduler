@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """RadioScheduler Daemon: A background process to manage radio station playback based on a schedule."""
-# Copyright (c) 2025 Daszkan (Jacek)
+# Copyright (c) 2026 Daszkan (Jacek)
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
@@ -48,6 +48,7 @@ def find_station_url(name: str, stations: List[Dict[str, Any]]) -> Optional[str]
     return None
 
 def main():
+    was_news_playing = False
     while True:
         config = load_config()
         stations = config.get("stations", [])
@@ -60,11 +61,30 @@ def main():
         
         # Sprawdź flagę "bez newsów na dziś"
         no_news_today = NO_NEWS_TODAY_LOCK.exists() and NO_NEWS_TODAY_LOCK.read_text().strip() == str(now.date())
+        manual_override = MANUAL_OVERRIDE_LOCK.exists()
+
+        # Auto-resume logic
+        if manual_override:
+            auto_resume_minutes = config.get("auto_resume_minutes", 0)
+            if auto_resume_minutes > 0:
+                try:
+                    # Sprawdź wiek pliku blokady
+                    mtime = datetime.fromtimestamp(MANUAL_OVERRIDE_LOCK.stat().st_mtime)
+                    if (now - mtime).total_seconds() / 60 > auto_resume_minutes:
+                        logging.info(f"Auto-resume: Manual override expired after {auto_resume_minutes} minutes.")
+                        MANUAL_OVERRIDE_LOCK.unlink(missing_ok=True)
+                        manual_override = False
+                except FileNotFoundError:
+                    pass # Plik mógł zostać usunięty w międzyczasie
 
         # News breaks (advanced first)
         news_cfg = sched.get("news_breaks", {})
         news_played_this_cycle = False
-        if not no_news_today and news_cfg.get("enabled", True):
+        
+        # Sprawdź czy newsy są włączone I (nie ma trybu ręcznego LUB tryb ręczny nie blokuje newsów)
+        should_play_news = news_cfg.get("enabled", True) and (not manual_override or not news_cfg.get("block_manual", True))
+
+        if not no_news_today and should_play_news:
             offset = news_cfg.get("start_minute_offset", 0)
             if news_cfg.get("use_advanced", False):
                 for rule in news_cfg.get("advanced", []) or []:
@@ -106,7 +126,7 @@ def main():
                 pass # Mamy już stację z newsów
 
         # Weekly schedule
-        if not target_station_name and not MANUAL_OVERRIDE_LOCK.exists():
+        if not target_station_name and not manual_override:
             rule_found = False
             for rule in sched.get("weekly", []):
                 if weekday in rule["days"] and rule["from"] <= current_time_str < rule["to"]:
@@ -120,11 +140,15 @@ def main():
         if target_station_name:
             target_url = find_station_url(target_station_name, stations)
             currently_playing_url = mpc.get_current_url()
+            
+            # Wymuś powrót do stacji po zakończeniu newsów
+            force_play = was_news_playing and not news_played_this_cycle
 
-            if target_url and target_url != currently_playing_url:
+            if target_url and (force_play or target_url != currently_playing_url):
                 logging.info(f"Changing station to: {target_station_name} (URL: {target_url})")
                 mpc.play_url(target_url)
         
+        was_news_playing = news_played_this_cycle
         if news_played_this_cycle:
             time.sleep(60) # Po newsach poczekaj minutę
 
