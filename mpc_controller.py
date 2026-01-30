@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2026 Daszkan (Jacek S.)
+# Copyright (c) 2025 - 2026 Daszkan (Jacek S.)
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT

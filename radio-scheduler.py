@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """RadioScheduler Daemon: A background process to manage radio station playback based on a schedule."""
-# Copyright (c) 2026 Daszkan (Jacek)
+# Copyright (c) 2025 - 2026 Daszkan (Jacek)
 #
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT

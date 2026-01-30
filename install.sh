@@ -23,8 +23,8 @@ else
 fi
 
 # Nadanie praw wykonywania
-chmod +x "$APP_DIR/radio-scheduler-gui.py"
-chmod +x "$APP_DIR/radio-scheduler.py"
+chmod +x "$APP_DIR/radio-scheduler-gui"
+chmod +x "$APP_DIR/radio-scheduler"
 
 # 2. Prepare .desktop file
 ICON_PATH="$APP_DIR/app_icon.png"

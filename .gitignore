@@ -14,3 +14,5 @@ build/
 *.log
 manual_override.lock
 no-news-today
+__pycache__/mpc_controller.cpython-313.pyc
+ROADMAP.md

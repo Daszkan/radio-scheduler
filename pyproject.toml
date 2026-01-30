@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "radio-scheduler"
-version = "1.0.1"
+version = "1.1.0"
 authors = [
   { name="Daszkan (Jacek S.)", email="metrokontakt24@gmail.com" },
 ]
