@@ -35,6 +35,10 @@ stations:
   url: https://pl-play.adtonos.com/tok-fm
   genre: news
   favorite: false
+- name: Radio Anime24
+  url: https://ssl-1.radiohost.pl:7028/stream
+  genre: Anime
+  favorite: false
 schedule:
   default: RMF Classic
   weekly:
