@@ -26,7 +26,17 @@ RadioScheduler is a desktop application for scheduling and automatically playing
 *   **Music Player Daemon (MPD)** and `mpc` (command-line client)
 
 ## Installation
+**Arch Linux / Manjaro / EndeavourOS (recommended – AUR)**
+```bash
+yay -S radio-scheduler-git
+# or
+paru -S radio-scheduler-git
+```
+After installation the menu entry should appear automatically.
+Launch with: radio-scheduler-gui
 
+
+**Manual installation (from source)**
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/Daszkan/radio-scheduler.git
