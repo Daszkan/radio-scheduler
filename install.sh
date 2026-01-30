@@ -42,16 +42,24 @@ Type=Application
 Categories=AudioVideo;Audio;Player;
 StartupNotify=true"
 
-# 3. Create shortcuts
-echo "[2/3] Creating application menu shortcut..."
+echo "[2/3] Creating application menu entry..."
 
-mkdir -p "$HOME/.local/share/applications"
+# Detect real user (important when run as root/fakeroot)
+if [ -n "$SUDO_USER" ]; then
+    REAL_USER="$SUDO_USER"
+    REAL_HOME="/home/$SUDO_USER"
+else
+    REAL_USER="$(whoami)"
+    REAL_HOME="$HOME"
+fi
 
-cat > "$HOME/.local/share/applications/radio-scheduler.desktop" << 'EOF'
+mkdir -p "$REAL_HOME/.local/share/applications"
+
+cat > "$REAL_HOME/.local/share/applications/radio-scheduler.desktop" << 'EOF'
 [Desktop Entry]
 Name=Radio Scheduler
-GenericName=Planer stacji radiowych
-Comment=Scheduling and automatic playback of Internet radio stations
+GenericName=Internet Radio Scheduler
+Comment=Automatic scheduling and playback of internet radio stations
 Exec=/usr/bin/radio-scheduler-gui
 Icon=radio-scheduler
 Terminal=false
@@ -60,11 +68,16 @@ Categories=Audio;Player;Utility;
 StartupNotify=true
 EOF
 
-chmod 644 "$HOME/.local/share/applications/radio-scheduler.desktop"
+chmod 644 "$REAL_HOME/.local/share/applications/radio-scheduler.desktop"
 
-update-desktop-database "$HOME/.local/share/applications/" 2>/dev/null || true
+# Refresh menu cache as the real user
+su - "$REAL_USER" -c "update-desktop-database ~/.local/share/applications/" 2>/dev/null || true
+su - "$REAL_USER" -c "xdg-desktop-menu forceupdate" 2>/dev/null || true
 
-echo "[3/3] Menu entry created."
+echo "[2/3] Menu entry created for user: $REAL_USER"
+echo "   → Path: $REAL_HOME/.local/share/applications/radio-scheduler.desktop"
+echo "   → If not visible yet: log out and log back in, or run:"
+echo "     update-desktop-database ~/.local/share/applications/"
 
 echo "--- Installation completed successfully! ---"
 echo "You can now launch the application from the menu or desktop."
