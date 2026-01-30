@@ -14,13 +14,13 @@ if ! command -v mpd &> /dev/null; then
 fi
 
 # 1. Check and install dependencies
-echo "[1/3] Installing Python dependencies..."
-if command -v pip3 &> /dev/null; then
-    pip3 install -r "$APP_DIR/requirements.txt"
-else
-    echo "Error: pip3 not found. Please install python3-pip."
-    exit 1
-fi
+#echo "[1/3] Installing Python dependencies..."
+#if command -v pip3 &> /dev/null; then
+#    pip3 install -r "$APP_DIR/requirements.txt"
+#else
+#    echo "Error: pip3 not found. Please install python3-pip."
+#    exit 1
+#fi
 
 # Nadanie praw wykonywania
 chmod +x "$APP_DIR/radio-scheduler-gui"
@@ -44,10 +44,21 @@ StartupNotify=true"
 
 # 3. Create shortcuts
 echo "[2/3] Creating application menu shortcut..."
-MENU_DIR="$HOME/.local/share/applications"
-mkdir -p "$MENU_DIR"
-echo "$DESKTOP_CONTENT" > "$MENU_DIR/radio-scheduler.desktop"
-chmod +x "$MENU_DIR/radio-scheduler.desktop"
+cat > ~/.local/share/applications/radio-scheduler.desktop << EOF
+[Desktop Entry]
+Name=Radio Scheduler
+GenericName=Planer stacji radiowych
+Comment=Automatyczne odtwarzanie i planowanie stacji radiowych internetowych
+Exec=/usr/bin/radio-scheduler-gui
+Icon=radio-scheduler
+Terminal=false
+Type=Application
+Categories=Audio;Player;Utility;
+StartupNotify=true
+EOF
+
+chmod +x ~/.local/share/applications/radio-scheduler.desktop
+update-desktop-database ~/.local/share/applications/ || true
 
 echo "[3/3] Creating desktop shortcut..."
 # Try to detect desktop directory
