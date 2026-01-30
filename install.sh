@@ -1,83 +1,91 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Determine the directory where the script is located (assuming it's the app directory)
+# RadioScheduler - Manual Installation Script
+# Run this from the cloned repository directory
+
+set -euo pipefail
+
+# Determine the directory where the script is located
 APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-echo "--- RadioScheduler Installation ---"
+echo "=== RadioScheduler Installation ==="
+echo "This script should be run from the cloned repository directory."
+echo "Current directory: $APP_DIR"
+echo ""
 
-# 0. Check for MPD (Warning only)
+# 0. Check for required tools
+echo "[1/4] Checking dependencies..."
+
 if ! command -v mpd &> /dev/null; then
-    echo "WARNING: MPD (Music Player Daemon) was not found!"
+    echo "WARNING: MPD (Music Player Daemon) not found!"
     echo "This application requires MPD and MPC to function."
-    echo "Please install them using your package manager (e.g., sudo apt install mpd mpc)."
-    echo "---------------------------------------------------"
+    echo "Please install them using your package manager:"
+    echo "  Arch:     sudo pacman -S mpd mpc"
+    echo "  Debian/Ubuntu: sudo apt install mpd mpc"
+    echo "  Fedora:   sudo dnf install mpd mpc"
+    echo ""
 fi
 
-# 1. Check and install dependencies
-#echo "[1/3] Installing Python dependencies..."
-#if command -v pip3 &> /dev/null; then
-#    pip3 install -r "$APP_DIR/requirements.txt"
-#else
-#    echo "Error: pip3 not found. Please install python3-pip."
-#    exit 1
-#fi
+if ! command -v python3 &> /dev/null; then
+    echo "ERROR: python3 not found. Please install Python 3."
+    exit 1
+fi
 
-# Nadanie praw wykonywania
-chmod +x "$APP_DIR/radio-scheduler-gui"
-chmod +x "$APP_DIR/radio-scheduler"
+if ! command -v pip3 &> /dev/null; then
+    echo "ERROR: pip3 not found. Please install python-pip."
+    exit 1
+fi
 
-# 2. Prepare .desktop file
-ICON_PATH="$APP_DIR/app_icon.png"
-# Use full path to python3 and script
-PYTHON_EXEC=$(which python3)
-EXEC_CMD="$PYTHON_EXEC \"$APP_DIR/radio-scheduler-gui.py\""
+# 1. Install Python dependencies (only in virtualenv or user mode recommended)
+echo "[2/4] Installing Python dependencies..."
 
-DESKTOP_CONTENT="[Desktop Entry]
-Name=RadioScheduler
-Comment=Radio station scheduler and player
-Exec=$EXEC_CMD
-Icon=$ICON_PATH
-Terminal=false
-Type=Application
-Categories=AudioVideo;Audio;Player;
-StartupNotify=true"
+echo "Note: Installing packages system-wide can break your system."
+echo "Recommended: use a virtual environment or --user flag."
 
-echo "[2/3] Creating application menu entry..."
-
-# Detect real user (important when run as root/fakeroot)
-if [ -n "$SUDO_USER" ]; then
-    REAL_USER="$SUDO_USER"
-    REAL_HOME="/home/$SUDO_USER"
+read -p "Continue with pip install --user? [y/N] " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    pip3 install --user -r "$APP_DIR/requirements.txt"
 else
-    REAL_USER="$(whoami)"
-    REAL_HOME="$HOME"
+    echo "Skipping pip install. Make sure dependencies are installed manually."
 fi
 
-mkdir -p "$REAL_HOME/.local/share/applications"
+# 2. Make scripts executable
+echo "[3/4] Making scripts executable..."
+chmod +x "$APP_DIR/radio-scheduler-gui.py"
+chmod +x "$APP_DIR/radio-scheduler.py"
 
-cat > "$REAL_HOME/.local/share/applications/radio-scheduler.desktop" << 'EOF'
+# 3. Create .desktop file
+echo "[4/4] Creating application menu entry..."
+
+ICON_PATH="$APP_DIR/app_icon.png"
+EXEC_CMD="$APP_DIR/radio-scheduler-gui.py"
+
+# Use absolute path for Exec
+cat > "$HOME/.local/share/applications/radio-scheduler.desktop" << EOF
 [Desktop Entry]
 Name=Radio Scheduler
 GenericName=Internet Radio Scheduler
 Comment=Automatic scheduling and playback of internet radio stations
-Exec=/usr/bin/radio-scheduler-gui
-Icon=radio-scheduler
+Exec=python3 $EXEC_CMD
+Icon=$ICON_PATH
 Terminal=false
 Type=Application
 Categories=Audio;Player;Utility;
 StartupNotify=true
 EOF
 
-chmod 644 "$REAL_HOME/.local/share/applications/radio-scheduler.desktop"
+chmod 644 "$HOME/.local/share/applications/radio-scheduler.desktop"
 
-# Refresh menu cache as the real user
-su - "$REAL_USER" -c "update-desktop-database ~/.local/share/applications/" 2>/dev/null || true
-su - "$REAL_USER" -c "xdg-desktop-menu forceupdate" 2>/dev/null || true
+# Refresh menu
+update-desktop-database "$HOME/.local/share/applications/" 2>/dev/null || true
 
-echo "[2/3] Menu entry created for user: $REAL_USER"
-echo "   → Path: $REAL_HOME/.local/share/applications/radio-scheduler.desktop"
-echo "   → If not visible yet: log out and log back in, or run:"
-echo "     update-desktop-database ~/.local/share/applications/"
-
-echo "--- Installation completed successfully! ---"
-echo "You can now launch the application from the menu or desktop."
+echo ""
+echo "=== Installation completed ==="
+echo "Menu entry created at: ~/.local/share/applications/radio-scheduler.desktop"
+echo "You can now launch the application from your menu."
+echo ""
+echo "To run manually:"
+echo "  python3 $APP_DIR/radio-scheduler-gui.py"
+echo ""
+echo "Have fun with RadioScheduler!"
