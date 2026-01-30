@@ -44,11 +44,14 @@ StartupNotify=true"
 
 # 3. Create shortcuts
 echo "[2/3] Creating application menu shortcut..."
-cat > ~/.local/share/applications/radio-scheduler.desktop << EOF
+
+mkdir -p "$HOME/.local/share/applications"
+
+cat > "$HOME/.local/share/applications/radio-scheduler.desktop" << 'EOF'
 [Desktop Entry]
 Name=Radio Scheduler
 GenericName=Planer stacji radiowych
-Comment=Automatyczne odtwarzanie i planowanie stacji radiowych internetowych
+Comment=Scheduling and automatic playback of Internet radio stations
 Exec=/usr/bin/radio-scheduler-gui
 Icon=radio-scheduler
 Terminal=false
@@ -57,25 +60,11 @@ Categories=Audio;Player;Utility;
 StartupNotify=true
 EOF
 
-chmod +x ~/.local/share/applications/radio-scheduler.desktop
-update-desktop-database ~/.local/share/applications/ || true
+chmod 644 "$HOME/.local/share/applications/radio-scheduler.desktop"
 
-echo "[3/3] Creating desktop shortcut..."
-# Try to detect desktop directory
-DESKTOP_DIR="$HOME/Desktop"
-if command -v xdg-user-dir &> /dev/null; then
-    DESKTOP_DIR=$(xdg-user-dir DESKTOP)
-elif [ -d "$HOME/Pulpit" ]; then
-    DESKTOP_DIR="$HOME/Pulpit"
-fi
+update-desktop-database "$HOME/.local/share/applications/" 2>/dev/null || true
 
-if [ -d "$DESKTOP_DIR" ]; then
-    echo "$DESKTOP_CONTENT" > "$DESKTOP_DIR/radio-scheduler.desktop"
-    chmod +x "$DESKTOP_DIR/radio-scheduler.desktop"
-    echo "Shortcut created: $DESKTOP_DIR/radio-scheduler.desktop"
-else
-    echo "Desktop directory not found, skipping."
-fi
+echo "[3/3] Menu entry created."
 
 echo "--- Installation completed successfully! ---"
 echo "You can now launch the application from the menu or desktop."
