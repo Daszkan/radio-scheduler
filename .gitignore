@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-config.yaml
 
 # Pliki generowane przez narzędzia do budowania
 dist/
@@ -12,7 +11,10 @@ build/
 
 # Pliki konfiguracyjne i logi specyficzne dla użytkownika
 *.log
+config.yaml
 manual_override.lock
 no-news-today
 __pycache__/mpc_controller.cpython-313.pyc
 ROADMAP.md
+roadmap.md
+build_release.sh
