@@ -608,6 +608,8 @@ class AboutTab(QWidget):
         pyside_version_label = QLabel(f"{PySide6.__version__}")
         env_layout.addRow(self.translator.tr("python_version"), python_version_label)
         env_layout.addRow(self.translator.tr("pyside_version"), pyside_version_label)
+        env_layout.addRow(self.translator.tr("qt_license_label"), QLabel("LGPLv3"))
+        
         main_layout.addWidget(env_group)
 
         # --- Instructions ---
