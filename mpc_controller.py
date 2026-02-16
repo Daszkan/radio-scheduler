@@ -5,6 +5,7 @@
 # https://opensource.org/licenses/MIT
 import subprocess
 import logging
+import socket
 from pathlib import Path
 
 LOG_PATH = Path.home() / ".config/radio-scheduler/mpc_controller.log"
@@ -76,3 +77,25 @@ class MPCController:
 
     def stop(self):
         return self._run_command(["mpc", "stop"], check=True) is not None
+
+    def get_status_dict(self):
+        """Connects to MPD via socket to get raw status (bitrate, audio format)."""
+        try:
+            # Connect to MPD (localhost:6600 is default)
+            with socket.create_connection(("localhost", 6600), timeout=0.1) as s:
+                s.recv(1024) # Skip initial greeting (OK MPD ...)
+                s.sendall(b"status\nclose\n")
+                response = b""
+                while True:
+                    chunk = s.recv(4096)
+                    if not chunk: break
+                    response += chunk
+                
+                status = {}
+                for line in response.decode('utf-8', errors='ignore').splitlines():
+                    if ':' in line:
+                        key, val = line.split(':', 1)
+                        status[key.strip()] = val.strip()
+                return status
+        except Exception:
+            return {}

@@ -40,10 +40,12 @@ from PySide6.QtWidgets import (
     QMenu,
     QMessageBox,
     QPushButton,
+    QProgressBar,
     QRadioButton,
     QSlider,
     QSpinBox,
     QStyle,
+    QStackedWidget,
     QSystemTrayIcon,
     QTabWidget,
     QTableWidget,
@@ -58,9 +60,9 @@ from PySide6.QtWidgets import (
     QSpacerItem,
     QSizePolicy
 )
-from PySide6.QtCore import QEvent, Qt, QTimer, QUrl, QByteArray
+from PySide6.QtCore import QEvent, Qt, QTimer, QUrl, QByteArray, QRectF, QPoint
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-from PySide6.QtGui import QAction, QDesktopServices, QIcon, QFont, QKeySequence, QShortcut, QPalette, QPainter, QPixmap
+from PySide6.QtGui import QAction, QDesktopServices, QIcon, QFont, QKeySequence, QShortcut, QPalette, QPainter, QPixmap, QColor, QBrush, QLinearGradient, QPolygon
 from PySide6.QtSvg import QSvgRenderer
 
 # --- Global Paths and Configuration ---
@@ -91,7 +93,7 @@ SVG_ICONS = {
     "reload.svg": '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#333"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>''',
     "settings.svg": '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#333"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>''',
     "exit.svg": '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#333"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>''',
-    "manual.svg": '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#333"><path d="M9 11.75c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zm6 0c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21 1.01.33 2.05.33 3.1 0 3.97-3.23 7.16-8 7.16z"/></svg>''',
+    "manual.svg": '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#333"><path d="M20.5 11H19V5h-2v4h-2V3h-2v4h-2V5H9v6H7.5c-.83 0-1.5.67-1.5 1.5v4c0 .83.67 1.5 1.5 1.5H16v-1.5c0-.83-.67-1.5-1.5-1.5H13v-2.5h1.5c.83 0 1.5-.67 1.5-1.5V11h4.5c.83 0 1.5-.67 1.5-1.5v-4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v2.5z"/></svg>''',
     "check.svg": '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#4CAF50"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>''',
     "error.svg": '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#F44336"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>'''
 }
@@ -138,6 +140,250 @@ def get_icon(name, fallback_enum=None):
     if fallback_enum is not None:
         return QApplication.style().standardIcon(fallback_enum)
     return QIcon()
+
+class AnalogClock(QWidget):
+    """A simple analog clock widget."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setMinimumSize(200, 200) # Allow resizing but keep reasonable min size
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update)
+        self.timer.start(1000)
+
+    def paintEvent(self, event):
+        side = min(self.width(), self.height())
+        time = datetime.now().time()
+
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.translate(self.width() / 2, self.height() / 2)
+        painter.scale(side / 200.0, side / 200.0)
+
+        # Hands
+        hour_hand = QPolygon([QPoint(7, 8), QPoint(-7, 8), QPoint(0, -50)])
+        minute_hand = QPolygon([QPoint(7, 8), QPoint(-7, 8), QPoint(0, -80)])
+        second_hand = QPolygon([QPoint(1, 8), QPoint(-1, 8), QPoint(0, -90)])
+
+        # Colors from theme
+        hour_color = self.palette().color(QPalette.ColorRole.Text)
+        minute_color = self.palette().color(QPalette.ColorRole.Text)
+        second_color = QColor(Qt.red)
+
+        # Draw hour hand
+        painter.save()
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(hour_color)
+        painter.rotate(30.0 * (time.hour + time.minute / 60.0))
+        painter.drawConvexPolygon(hour_hand)
+        painter.restore()
+
+        # Draw minute hand
+        painter.save()
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(minute_color)
+        painter.rotate(6.0 * (time.minute + time.second / 60.0))
+        painter.drawConvexPolygon(minute_hand)
+        painter.restore()
+        
+        # Draw second hand
+        painter.save()
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(second_color)
+        painter.rotate(6.0 * time.second)
+        painter.drawConvexPolygon(second_hand)
+        painter.restore()
+
+        # Draw clock face
+        painter.setPen(hour_color)
+        for i in range(12):
+            painter.drawLine(88, 0, 96, 0)
+            painter.rotate(30.0)
+
+        # Draw center point
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(second_color)
+        painter.drawEllipse(-3, -3, 6, 6)
+
+class DigitalClock(QWidget):
+    """A simple digital clock widget."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignCenter)
+        layout.setContentsMargins(0, 20, 0, 20)
+        
+        self.clock_label = QLabel()
+        self.clock_label.setAlignment(Qt.AlignCenter)
+        font = QFont()
+        font.setPointSize(48)
+        font.setBold(True)
+        self.clock_label.setFont(font)
+        layout.addWidget(self.clock_label)
+        
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_time)
+        self.timer.start(1000)
+        self.update_time()
+
+    def update_time(self):
+        self.clock_label.setText(datetime.now().strftime("%H:%M:%S"))
+
+class ScheduleInfoWidget(QWidget):
+    """A widget showing date and next scheduled event."""
+    def __init__(self, main_window, parent=None):
+        super().__init__(parent)
+        self.mw = main_window
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 10, 0, 10)
+        
+        # Next Event Container
+        self.next_event_group = QGroupBox()
+        self.next_event_group.setAlignment(Qt.AlignCenter)
+        vbox = QVBoxLayout(self.next_event_group)
+        
+        self.next_station_label = QLabel("--")
+        self.next_station_label.setAlignment(Qt.AlignCenter)
+        self.next_station_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        
+        self.countdown_label = QLabel("--")
+        self.countdown_label.setAlignment(Qt.AlignCenter)
+        self.countdown_label.setStyleSheet("color: #555;")
+        
+        vbox.addWidget(self.next_station_label)
+        vbox.addWidget(self.countdown_label)
+        
+        # News Label
+        self.news_label = QLabel()
+        self.news_label.setAlignment(Qt.AlignCenter)
+        self.news_label.setStyleSheet("color: #2196F3; font-weight: bold; margin-top: 5px;")
+
+        # Return Button
+        self.return_btn = QPushButton()
+        self.return_btn.setIcon(get_icon("reload", QStyle.StandardPixmap.SP_BrowserReload))
+        self.return_btn.clicked.connect(self.mw.return_to_schedule)
+        self.return_btn.setStyleSheet("background-color: #f44336; color: white; font-weight: bold; padding: 6px; border-radius: 4px;")
+        self.return_btn.hide()
+        
+        # Date
+        self.date_label = QLabel()
+        self.date_label.setAlignment(Qt.AlignCenter)
+        self.date_label.setStyleSheet("color: #666; font-size: 16px; font-weight: bold;")
+        layout.addWidget(self.date_label)
+
+        layout.addSpacing(15)
+        layout.addWidget(self.next_event_group)
+        layout.addWidget(self.news_label)
+        layout.addWidget(self.return_btn)
+        
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_state)
+        self.timer.start(1000)
+        
+        self.update_state()
+
+    def update_state(self):
+        now = datetime.now()
+        # Format daty zależny od locale byłby lepszy, ale tutaj uprościmy
+        self.date_label.setText(now.strftime("%Y-%m-%d"))
+        
+        # Update translations
+        self.next_event_group.setTitle(self.mw.translator.tr("next_schedule_event"))
+        self.return_btn.setText(self.mw.translator.tr("return_to_schedule"))
+
+        # Find next event
+        next_rule = self.find_next_rule(now)
+
+        # Show "Return to schedule" button only if manual override is active AND there's a schedule to return to.
+        # A schedule is active if there's a next rule OR a default station is set.
+        has_active_schedule = next_rule is not None or self.mw.schedule.get("default")
+        if MANUAL_OVERRIDE_LOCK.exists() and has_active_schedule:
+            self.return_btn.show()
+        else:
+            self.return_btn.hide()
+
+        if next_rule:
+            self.next_station_label.setText(f"{next_rule['station']}")
+            # Calculate countdown
+            target_time = datetime.combine(now.date(), time.fromisoformat(next_rule['from']))
+            delta = target_time - now
+            minutes = int(delta.total_seconds() / 60)
+            self.countdown_label.setText(self.mw.translator.tr("event_in", time=next_rule['from'], min=minutes))
+        else:
+            self.next_station_label.setText(self.mw.translator.tr("no_events_today"))
+            self.countdown_label.setText("")
+
+        # Find next news
+        next_news = self.find_next_news(now)
+        if next_news:
+            self.news_label.setText(self.mw.translator.tr("next_news", time=next_news.strftime("%H:%M")))
+            self.news_label.show()
+        else:
+            self.news_label.hide()
+
+    def find_next_rule(self, now):
+        """Finds the next scheduled rule for today."""
+        weekday_map = {0: "mon", 1: "tue", 2: "wed", 3: "thu", 4: "fri", 5: "sat", 6: "sun"}
+        current_day_code = weekday_map[now.weekday()]
+        current_time_str = now.strftime("%H:%M")
+        
+        rules = self.mw.schedule.get("weekly", [])
+        candidates = []
+        
+        for rule in rules:
+            if current_day_code in rule.get("days", []):
+                if rule["from"] > current_time_str:
+                    candidates.append(rule)
+        
+        candidates.sort(key=lambda x: x["from"])
+        return candidates[0] if candidates else None
+
+    def find_next_news(self, now):
+        if NO_NEWS_TODAY_LOCK.exists() and NO_NEWS_TODAY_LOCK.read_text().strip() == str(now.date()):
+            return None
+            
+        news_cfg = self.mw.schedule.get("news_breaks", {})
+        if not news_cfg.get("enabled", True):
+            return None
+
+        offset = news_cfg.get("start_minute_offset", 0)
+        candidates = []
+        
+        weekday_map = {0: "mon", 1: "tue", 2: "wed", 3: "thu", 4: "fri", 5: "sat", 6: "sun"}
+        weekday = weekday_map[now.weekday()]
+
+        # Helper to process rules
+        def process_rule(rule):
+            try:
+                start = datetime.strptime(rule.get("from", "00:00"), "%H:%M").time()
+                end = datetime.strptime(rule.get("to", "22:00"), "%H:%M").time()
+                interval = rule.get("interval_minutes", 60)
+                
+                curr = datetime.combine(now.date(), start)
+                end_dt = datetime.combine(now.date(), end)
+                
+                while curr <= end_dt:
+                    trigger_dt = curr + timedelta(minutes=offset)
+                    if trigger_dt > now and trigger_dt.time() <= end:
+                         candidates.append(trigger_dt)
+                    curr += timedelta(minutes=interval)
+            except Exception as e:
+                logger.error(f"Error processing news rule in dashboard: {e}", exc_info=True)
+
+        if news_cfg.get("use_advanced", False):
+            for rule in news_cfg.get("advanced", []):
+                if weekday in rule.get("days", []):
+                    process_rule(rule)
+        else:
+            simple = news_cfg.get("simple", {})
+            # Fix: Default to all days if missing (matches daemon logic)
+            days = simple.get("days", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"])
+            if weekday in days and simple.get("station"):
+                process_rule(simple)
+
+        if candidates:
+            candidates.sort()
+            return candidates[0]
+        return None
 
 mpc = MPCController()
 
@@ -296,7 +542,7 @@ class AboutTab(QWidget):
         header_layout.addWidget(icon_label)
 
         title_layout = QVBoxLayout()
-        self.app_name_label = QLabel("RadioScheduler v1.1")
+        self.app_name_label = QLabel("RadioScheduler v1.2")
         self.app_name_label.setFont(QFont("Arial", 20, QFont.Bold))
         title_layout.addWidget(self.app_name_label)
         header_layout.addLayout(title_layout)
@@ -314,6 +560,16 @@ class AboutTab(QWidget):
         info_layout.addRow(self.translator.tr("license"), self.license_label)
         info_layout.addRow("GitHub:", self.github_label)
         main_layout.addWidget(info_group)
+
+        # --- Scheduler Status ---
+        self.scheduler_group = QGroupBox(self.translator.tr("scheduler_status_title"))
+        scheduler_layout = QHBoxLayout(self.scheduler_group)
+        self.scheduler_status_icon = QLabel()
+        self.scheduler_status_label = QLabel()
+        scheduler_layout.addWidget(self.scheduler_status_icon)
+        scheduler_layout.addWidget(self.scheduler_status_label)
+        scheduler_layout.addStretch()
+        main_layout.addWidget(self.scheduler_group)
 
         # --- MPD Status ---
         mpd_group = QGroupBox(self.translator.tr("mpd_status"))
@@ -432,12 +688,22 @@ class AboutTab(QWidget):
 
     def retranslate_ui(self):
         # This method is now only for text translation, not logic
+        self.scheduler_group.setTitle(self.translator.tr("scheduler_status_title"))
         self.stats_group.setTitle(self.translator.tr("mpd_stats_title"))
         self.instr_group.setTitle(self.translator.tr("mpd_install_title"))
         # The content of the labels is set in update_content
 
     def update_content(self):
         """Fetches dynamic data (like MPD status) and updates the UI content."""
+        # Check Scheduler Daemon
+        is_scheduler_running = subprocess.call(["pgrep", "-f", "radio-scheduler.py"], stdout=subprocess.DEVNULL) == 0
+        if is_scheduler_running:
+            self.scheduler_status_label.setText(self.translator.tr("scheduler_status_active"))
+            self.scheduler_status_icon.setPixmap(get_icon("check", QStyle.StandardPixmap.SP_DialogApplyButton).pixmap(16, 16))
+        else:
+            self.scheduler_status_label.setText(self.translator.tr("scheduler_status_inactive"))
+            self.scheduler_status_icon.setPixmap(get_icon("error", QStyle.StandardPixmap.SP_DialogCancelButton).pixmap(16, 16))
+
         is_mpd_running = subprocess.call(["pgrep", "-f", "mpd"], stdout=subprocess.DEVNULL) == 0
         if is_mpd_running:
             self.mpd_status_label.setText(self.translator.tr("mpd_status_active"))
@@ -476,6 +742,7 @@ class MainWindow(QMainWindow):
         self.last_known_song = None # Bufor dla aktualnie granego utworu
         self.is_restarting = False # Flaga do obsługi restartu
         self.manual_override_status = MANUAL_OVERRIDE_LOCK.exists() # Śledzenie stanu blokady dla powiadomień
+        self.previous_volume = 50 # Zapamiętana głośność przed wyciszeniem
         
         self.nam = QNetworkAccessManager(self) # Menedżer sieci do testowania URL
         self.sleep_timer = QTimer(self) # Timer dla wyłącznika czasowego
@@ -500,6 +767,7 @@ class MainWindow(QMainWindow):
         self.timer.start(10000)
 
         self.tabs = QTabWidget()
+        self.tab_player_widget = self.tab_player()
         self.tab_stations_widget = self.tab_stations()
         self.tab_schedule_widget = self.tab_schedule()
         self.tab_news_widget = self.tab_news()
@@ -507,6 +775,7 @@ class MainWindow(QMainWindow):
         self.tab_settings_widget = self.tab_settings()
         self.tab_mpd_config_widget = self.tab_mpd_config()
 
+        self.tabs.insertTab(0, self.tab_player_widget, "") # Wstaw jako pierwszą
         self.tabs.addTab(self.tab_stations_widget, "")
         self.tabs.addTab(self.tab_schedule_widget, "")
         self.tabs.addTab(self.tab_news_widget, "")
@@ -606,6 +875,14 @@ class MainWindow(QMainWindow):
         self.restart_daemon_action.triggered.connect(self.restart_scheduler_daemon)
         self.addAction(self.restart_daemon_action)
 
+        # Akcje dla odtwarzacza
+        self.play_action = QAction(self)
+        self.play_action.triggered.connect(lambda: mpc.play())
+        self.addAction(self.play_action)
+
+        self.stop_action = QAction(self)
+        self.stop_action.triggered.connect(lambda: mpc.stop())
+        self.addAction(self.stop_action)
 
     def create_tray_icon(self):
         """Creates and configures the system tray icon and its menu."""
@@ -659,7 +936,7 @@ class MainWindow(QMainWindow):
             for s in favorites:
                 a = menu.addAction(s['name'])
                 a.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_MediaPlay)) # Użyj istniejącej ikony
-                a.triggered.connect(lambda _, x=s: (play_now(x), self.update_return_to_schedule_button()))
+                a.triggered.connect(lambda _, x=s: (play_now(x), self.now_playing_label.setText(self.translator.tr("now_playing", current=x["name"])), self.update_return_to_schedule_button()))
                 if s['url'] == current_url:
                     font = a.font()
                     font.setBold(True)
@@ -818,7 +1095,70 @@ class MainWindow(QMainWindow):
         """Refreshes UI elements that depend on external state (like MPD). Called once at start and then by timer."""
         self.about_tab.update_content()
         self.update_volume_slider_status()
-        self.now_playing_label.setText(self.translator.tr("now_playing", current=mpc.get_current()))
+        
+        current_display = mpc.get_current()
+        current_url = mpc.get_current_url()
+
+        # Jeśli MPD zwraca URL jako tytuł (brak metadanych) lub nic nie zwraca, spróbuj wyświetlić nazwę stacji
+        if current_display == "–" or (current_url and current_display == current_url) or (current_display and "://" in current_display):
+             if current_url:
+                 # Znajdź stację po URL
+                 station = next((s for s in self.stations if s["url"] == current_url), None)
+                 if station:
+                     current_display = station["name"]
+
+        self.now_playing_label.setText(self.translator.tr("now_playing", current=current_display))
+        self.update_player_metadata()
+        
+
+
+    def play_next_station(self):
+        """Plays the next station in the list."""
+        if not self.stations: return
+        current_url = self.last_known_song
+        idx = -1
+        for i, s in enumerate(self.stations):
+            if s["url"] == current_url:
+                idx = i
+                break
+        
+        next_idx = (idx + 1) % len(self.stations)
+        play_now(self.stations[next_idx])
+        self.now_playing_label.setText(self.translator.tr("now_playing", current=self.stations[next_idx]["name"]))
+        self.last_known_song = self.stations[next_idx]["url"]
+        self.update_playing_station_in_tree()
+        self.update_return_to_schedule_button()
+        self.update_tray_icon()
+        self.initial_ui_refresh()
+
+    def play_prev_station(self):
+        """Plays the previous station in the list."""
+        if not self.stations: return
+        current_url = self.last_known_song
+        idx = -1
+        for i, s in enumerate(self.stations):
+            if s["url"] == current_url:
+                idx = i
+                break
+        
+        prev_idx = (idx - 1 + len(self.stations)) % len(self.stations)
+        play_now(self.stations[prev_idx])
+        self.now_playing_label.setText(self.translator.tr("now_playing", current=self.stations[prev_idx]["name"]))
+        self.last_known_song = self.stations[prev_idx]["url"]
+        self.update_playing_station_in_tree()
+        self.update_return_to_schedule_button()
+        self.update_tray_icon()
+        self.initial_ui_refresh()
+
+    def toggle_mute(self):
+        """Toggles mute state."""
+        vol = mpc.get_volume()
+        if vol is not None and vol > 0:
+            self.previous_volume = vol
+            mpc.set_volume(0)
+        else:
+            target = self.previous_volume if self.previous_volume > 0 else 50
+            mpc.set_volume(target)
 
     def show(self):
         super().show()
@@ -913,6 +1253,8 @@ class MainWindow(QMainWindow):
         self.quit_action.setText(self.translator.tr("exit"))
         self.add_station_action.setText(self.translator.tr("add_station"))
         self.edit_station_action.setText(self.translator.tr("edit_station"))
+        self.play_action.setText(self.translator.tr("play"))
+        self.stop_action.setText(self.translator.tr("stop"))
         self.delete_station_action.setText(self.translator.tr("delete_station"))
         self.play_station_action.setText(self.translator.tr("play_station"))
         self.add_to_favorites_action.setText(self.translator.tr("add_to_favorites"))
@@ -921,12 +1263,13 @@ class MainWindow(QMainWindow):
         self.restart_daemon_action.setText(self.translator.tr("restart_daemon"))
         self.no_news_today_action.setText(self.translator.tr("disable_news_today"))
 
-        self.tabs.setTabText(0, self.translator.tr("stations_tab_title"))
-        self.tabs.setTabText(1, self.translator.tr("schedule_tab_title"))
-        self.tabs.setTabText(2, self.translator.tr("news_tab_title"))
-        self.tabs.setTabText(3, self.translator.tr("settings_tab_title"))
-        self.tabs.setTabText(4, self.translator.tr("mpd_config_tab_title"))
-        self.tabs.setTabText(5, self.translator.tr("about_tab_title"))
+        self.tabs.setTabText(0, self.translator.tr("player_tab_title"))
+        self.tabs.setTabText(1, self.translator.tr("stations_tab_title"))
+        self.tabs.setTabText(2, self.translator.tr("schedule_tab_title"))
+        self.tabs.setTabText(3, self.translator.tr("news_tab_title"))
+        self.tabs.setTabText(4, self.translator.tr("settings_tab_title"))
+        self.tabs.setTabText(5, self.translator.tr("mpd_config_tab_title"))
+        self.tabs.setTabText(6, self.translator.tr("about_tab_title"))
         # Explicitly call retranslate on the child widget
         self.about_tab.update_content()
 
@@ -935,6 +1278,152 @@ class MainWindow(QMainWindow):
         subprocess.run(["pkill", "-f", "radio-scheduler.py"], check=False)
         subprocess.Popen([sys.executable, str(DAEMON_PATH)], start_new_session=True)
         QMessageBox.information(self, self.translator.tr("restart_daemon"), self.translator.tr("daemon_restarted"))
+
+    def update_player_metadata(self):
+        """Updates bitrate and format labels using raw MPD status."""
+        status = mpc.get_status_dict()
+        
+        # Bitrate
+        bitrate = status.get('bitrate', '0')
+        if bitrate and bitrate != '0':
+            self.bitrate_label.setText(f"{bitrate} {self.translator.tr('kbps')}")
+        else:
+            self.bitrate_label.setText("")
+
+        # Audio Format (rate:bits:channels) e.g., 44100:24:2
+        audio = status.get('audio')
+        if audio and ':' in audio:
+            try:
+                rate, bits, chans = audio.split(':')
+                rate_khz = float(rate) / 1000
+                ch_str = self.translator.tr("stereo") if chans == '2' else (self.translator.tr("mono") if chans == '1' else f"{chans} ch")
+                bits_str = f"{bits} {self.translator.tr('bits')}" if bits != 'f' else "float"
+                self.format_label.setText(f"{rate_khz:g} {self.translator.tr('khz')} | {bits_str} | {ch_str}")
+            except ValueError:
+                self.format_label.setText(audio)
+        else:
+            self.format_label.setText("")
+
+    # === ODTWARZACZ ===
+    def tab_player(self):
+        """Creates the 'Player' tab widget."""
+        w = QWidget()
+        main_layout = QVBoxLayout(w)
+        main_layout.setAlignment(Qt.AlignCenter)
+
+        # Etykieta na aktualnie grany utwór
+        self.now_playing_label = QLabel(self.translator.tr("now_playing", current="..."))
+        self.now_playing_label.setFont(QFont("Arial", 16))
+        self.now_playing_label.setWordWrap(True)
+        self.now_playing_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.now_playing_label)
+
+        # --- Dashboard / Clock Stack ---
+        self.player_dashboard_stack = QStackedWidget()
+        
+        self.digital_clock = DigitalClock(self)
+        self.analog_clock = AnalogClock(self)
+        
+        self.player_dashboard_stack.addWidget(self.digital_clock)
+        self.player_dashboard_stack.addWidget(self.analog_clock)
+        
+        # Set initial widget based on config
+        clock_type = self.config.get("player_clock_type", "digital")
+        if clock_type == "analog":
+            self.player_dashboard_stack.setCurrentWidget(self.analog_clock)
+        else:
+            self.player_dashboard_stack.setCurrentWidget(self.digital_clock)
+
+        main_layout.addWidget(self.player_dashboard_stack)
+        self.schedule_info = ScheduleInfoWidget(self)
+        main_layout.addWidget(self.schedule_info)
+        main_layout.addSpacing(10)
+
+        # Przyciski Play/Stop
+        player_controls_layout = QHBoxLayout()
+        
+        prev_btn = QPushButton(self.translator.tr("prev_station"))
+        prev_btn.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSkipBackward))
+        prev_btn.clicked.connect(self.play_prev_station)
+
+        play_btn = QPushButton(self.translator.tr("play"))
+        play_btn.setIcon(get_icon("play", QStyle.StandardPixmap.SP_MediaPlay))
+        play_btn.clicked.connect(self.play_action.trigger)
+        
+        stop_btn = QPushButton(self.translator.tr("stop"))
+        stop_btn.setIcon(get_icon("stop", QStyle.StandardPixmap.SP_MediaStop))
+        stop_btn.clicked.connect(self.stop_action.trigger)
+
+        next_btn = QPushButton(self.translator.tr("next_station"))
+        next_btn.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSkipForward))
+        next_btn.clicked.connect(self.play_next_station)
+
+        player_controls_layout.addStretch()
+        player_controls_layout.addWidget(prev_btn)
+        player_controls_layout.addWidget(play_btn)
+        player_controls_layout.addWidget(stop_btn)
+        player_controls_layout.addWidget(next_btn)
+        player_controls_layout.addStretch()
+        main_layout.addLayout(player_controls_layout)
+
+        # Kontrolki głośności
+        vol_layout = QHBoxLayout()
+        
+        # Przycisk Mute zamiast etykiety tekstowej
+        self.mute_btn = QPushButton()
+        self.mute_btn.setIcon(get_icon("volume", QStyle.StandardPixmap.SP_MediaVolume))
+        self.mute_btn.setFlat(True) # Wygląda jak ikona
+        self.mute_btn.clicked.connect(self.toggle_mute)
+        self.mute_btn.setToolTip(self.translator.tr("mute"))
+
+        self.volume_slider = QSlider(Qt.Horizontal)
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.valueChanged.connect(mpc.set_volume)
+        
+        # Pasek postępu (wizualizacja)
+        self.volume_progress = QProgressBar()
+        self.volume_progress.setRange(0, 100)
+        self.volume_progress.setTextVisible(False)
+        self.volume_progress.setFixedWidth(100)
+        self.volume_progress.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #bbb;
+                border-radius: 4px;
+                background: #eee;
+                height: 10px;
+            }
+            QProgressBar::chunk {
+                background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, 
+                                                  stop:0 #4CAF50, stop:0.6 #FFEB3B, stop:1 #F44336);
+                border-radius: 4px;
+            }
+        """)
+        self.volume_slider.valueChanged.connect(self.volume_progress.setValue)
+
+        vol_layout.addWidget(self.mute_btn)
+        vol_layout.addWidget(self.volume_slider)
+        vol_layout.addWidget(self.volume_progress)
+        main_layout.addLayout(vol_layout)
+
+        # Sekcja metadanych (Bitrate / Format)
+        meta_layout = QHBoxLayout()
+        self.bitrate_label = QLabel("")
+        self.format_label = QLabel("")
+        
+        meta_font = QFont("Arial", 9)
+        self.bitrate_label.setFont(meta_font); self.bitrate_label.setStyleSheet("color: #666;")
+        self.format_label.setFont(meta_font); self.format_label.setStyleSheet("color: #666;")
+
+        meta_layout.addStretch()
+        meta_layout.addWidget(self.bitrate_label)
+        meta_layout.addSpacing(20)
+        meta_layout.addWidget(self.format_label)
+        meta_layout.addStretch()
+        
+        main_layout.addSpacing(10)
+        main_layout.addLayout(meta_layout)
+
+        return w
 
     # === STACJE ===
     def tab_stations(self):
@@ -969,9 +1458,6 @@ class MainWindow(QMainWindow):
         delete = QPushButton(self.translator.tr("delete")); delete.clicked.connect(self.delete_station_action.trigger)
         delete.setStyleSheet("background-color: #f44336; color: white;")
 
-        play = QPushButton(self.translator.tr("play_now")); play.clicked.connect(self.play_station_action.trigger)
-        self.return_to_schedule_btn = QPushButton(self.translator.tr("return_to_schedule"))
-
         # Przyciski do zmiany kolejności
         reorder_layout = QHBoxLayout()
         move_up_btn = QPushButton(self.translator.tr("move_up")); move_up_btn.clicked.connect(self.move_station_up)
@@ -979,18 +1465,6 @@ class MainWindow(QMainWindow):
         reorder_layout.addWidget(move_up_btn)
         reorder_layout.addWidget(move_down_btn)
         
-        self.return_to_schedule_btn.clicked.connect(self.return_to_schedule) # Connect to the correct method
-        self.update_return_to_schedule_button()
-
-        play.setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;")
-        self.return_to_schedule_btn.setStyleSheet("background-color: #f44336; color: white;")
-
-        volume_slider = QSlider(Qt.Horizontal)
-        self.volume_slider = volume_slider
-        self.volume_slider.setRange(0, 100)
-        self.volume_slider.valueChanged.connect(mpc.set_volume)
-        self.volume_label = QLabel(self.translator.tr("volume"))
-        self.update_volume_slider_status()
         self.tree.setFocus() # Ustaw fokus na drzewie, aby skróty od razu działały
 
         # Przycisk Zastosuj dla stacji
@@ -1007,19 +1481,16 @@ class MainWindow(QMainWindow):
 
         btns.addSpacing(20)
         btns.addLayout(reorder_layout)
-        btns.addSpacing(20)
-        btns.addWidget(play)
-        btns.addWidget(self.return_to_schedule_btn)
         btns.addStretch()
         btns.addWidget(self.apply_stations_btn)
-        btns.addSpacing(10)
-        btns.addWidget(self.volume_label)
-        btns.addWidget(self.volume_slider)
 
-        # Etykieta na aktualnie grany utwór
-        self.now_playing_label = QLabel(self.translator.tr("now_playing", current="..."))
-        self.now_playing_label.setWordWrap(True)
-        btns.addWidget(self.now_playing_label)
+        # Przycisk powrotu do harmonogramu
+        self.return_to_schedule_btn = QPushButton(self.translator.tr("return_to_schedule"))
+        self.return_to_schedule_btn.clicked.connect(self.return_to_schedule)
+        self.return_to_schedule_btn.setStyleSheet("background-color: #f44336; color: white;")
+        btns.addWidget(self.return_to_schedule_btn)
+        self.update_return_to_schedule_button()
+
         main_layout.addLayout(btns, 1)
         return w
 
@@ -1050,12 +1521,22 @@ class MainWindow(QMainWindow):
         volume = mpc.get_volume()
         if volume is not None:
             self.volume_slider.setEnabled(True)
-            self.volume_label.setText(self.translator.tr("volume"))
+            self.mute_btn.setEnabled(True)
             if not self.volume_slider.isSliderDown():
                 self.volume_slider.setValue(volume)
+                self.volume_progress.setValue(volume)
+            
+            # Update mute icon based on volume
+            if volume == 0:
+                self.mute_btn.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaVolumeMuted))
+                self.mute_btn.setToolTip(self.translator.tr("unmute"))
+            else:
+                self.mute_btn.setIcon(get_icon("volume", QStyle.StandardPixmap.SP_MediaVolume))
+                self.mute_btn.setToolTip(self.translator.tr("mute"))
         else:
             self.volume_slider.setEnabled(False)
-            self.volume_label.setText(f'{self.translator.tr("volume")} ({self.translator.tr("mpd_status_inactive")})')
+            self.mute_btn.setEnabled(False)
+            self.volume_progress.setValue(0)
 
     def update_playing_station_in_tree(self):
         """Efficiently updates the currently playing station in the tree without a full rebuild."""
@@ -1175,6 +1656,7 @@ class MainWindow(QMainWindow):
         station = item.data(0, Qt.UserRole)
         if station:
             play_now(station)
+            self.now_playing_label.setText(self.translator.tr("now_playing", current=station["name"]))
             # Natychmiast zaktualizuj bufor, aby interfejs odświeżył się od razu
             self.last_known_song = station.get("url")
             self.update_return_to_schedule_button()
@@ -1651,12 +2133,18 @@ class MainWindow(QMainWindow):
         self.news_config["block_manual"] = self.news_block_manual.isChecked()
         self.news_config["use_advanced"] = self.advanced_mode_radio.isChecked()
         self.news_config["start_minute_offset"] = self.news_offset.value()
+        
+        # Preserve existing days or default to all days to prevent config corruption
+        current_simple = self.news_config.get("simple", {})
+        days = current_simple.get("days", ["mon", "tue", "wed", "thu", "fri", "sat", "sun"])
+        
         self.news_config["simple"] = {
             "station": self.news_station.currentText(),
             "from": self.news_from.time().toString("HH:mm"),
             "to": self.news_to.time().toString("HH:mm"),
             "interval_minutes": self.news_interval.value(),
-            "duration_minutes": self.news_duration.value()
+            "duration_minutes": self.news_duration.value(),
+            "days": days
         }
         # Zaawansowane reguły są już w self.news_config["advanced"]
 
@@ -1840,6 +2328,18 @@ class MainWindow(QMainWindow):
         auto_resume_layout.addWidget(QLabel(f"({self.translator.tr('auto_resume_hint')})"))
         other_layout.addLayout(auto_resume_layout)
 
+        # Clock type setting
+        clock_type_layout = QHBoxLayout()
+        clock_type_layout.addWidget(QLabel(self.translator.tr("player_clock_type")))
+        self.clock_type_combo = QComboBox()
+        self.clock_type_combo.addItem(self.translator.tr("clock_digital"), "digital")
+        self.clock_type_combo.addItem(self.translator.tr("clock_analog"), "analog")
+        current_clock_type = self.config.get("player_clock_type", "digital")
+        idx = self.clock_type_combo.findData(current_clock_type)
+        if idx != -1: self.clock_type_combo.setCurrentIndex(idx)
+        clock_type_layout.addWidget(self.clock_type_combo)
+        other_layout.addLayout(clock_type_layout)
+
         save_other_btn = QPushButton(self.translator.tr("save_other_settings"))
         save_other_btn.clicked.connect(self.save_simple_settings)
         other_layout.addWidget(save_other_btn)
@@ -2005,13 +2505,23 @@ Categories=AudioVideo;Audio;Player;
         """Saves simple boolean settings directly to the config file."""
         self.config["hide_on_startup"] = self.hide_on_startup_checkbox.isChecked()
         self.config["auto_resume_minutes"] = self.auto_resume_spin.value()
+        self.config["player_clock_type"] = self.clock_type_combo.currentData()
         try:
             with open(CONFIG_PATH, "w", encoding="utf-8") as f:
                 yaml.safe_dump(self.config, f, allow_unicode=True, sort_keys=False)
             self.statusBar().showMessage(self.translator.tr("settings_saved"), 2000)
+            self.update_player_clock_view() # Update view after saving
         except Exception as e:
             logger.error(f"Błąd zapisu prostych ustawień: {e}")
             QMessageBox.critical(self, self.translator.tr("save_error"), self.translator.tr("config_save_error", e=e))
+
+    def update_player_clock_view(self):
+        """Switches between digital and analog clock in the player tab."""
+        clock_type = self.config.get("player_clock_type", "digital")
+        if clock_type == "analog":
+            self.player_dashboard_stack.setCurrentWidget(self.analog_clock)
+        else:
+            self.player_dashboard_stack.setCurrentWidget(self.digital_clock)
 
 app = QApplication(sys.argv)
 app.setQuitOnLastWindowClosed(False)
@@ -2035,6 +2545,7 @@ def main():
         if station:
             logger.info(f"Auto-playing station from CLI: {args.play}")
             play_now(station)
+            win.now_playing_label.setText(win.translator.tr("now_playing", current=station["name"]))
             win.last_known_song = station["url"]
             win.update_playing_station_in_tree()
             win.update_return_to_schedule_button()

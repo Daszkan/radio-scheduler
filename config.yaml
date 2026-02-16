@@ -1,4 +1,8 @@
 stations:
+- favorite: true
+  genre: pop
+  name: RMF FM
+  url: http://rmfstream1.interia.pl:8000/rmf_fm
 - name: Polskie Radio Program 1
   url: http://stream3.polskieradio.pl:8950
   genre: pop
@@ -11,10 +15,6 @@ stations:
   url: http://mp3.polskieradio.pl:8904
   genre: pop
   favorite: false
-- name: RMF FM
-  url: http://rmfstream1.interia.pl:8000/rmf_fm
-  genre: pop
-  favorite: true
 - name: RMF Classic
   url: http://rmfstream1.interia.pl:8000/rmf_classic
   genre: classic
@@ -35,8 +35,12 @@ stations:
   url: https://pl-play.adtonos.com/tok-fm
   genre: news
   favorite: false
+- name: Radio Anime24
+  url: https://ssl-1.radiohost.pl:7028/stream
+  genre: asian
+  favorite: false
 schedule:
-  default: RMF Classic
+  default: null
   weekly:
   - days:
     - mon
@@ -70,9 +74,18 @@ schedule:
       from: 00:00
       to: '23:00'
       interval_minutes: 60
-      duration_minutes: 8
+      duration_minutes: 15
+      days:
+      - mon
+      - tue
+      - wed
+      - thu
+      - fri
+      - sat
+      - sun
     advanced: []
-    start_minute_offset: 0
+    start_minute_offset: 55
+    block_manual: true
 language: pl
 shortcuts:
   save: Ctrl+S
@@ -85,3 +98,4 @@ shortcuts:
   move_down: Ctrl+Down
 hide_on_startup: false
 auto_resume_minutes: 0
+player_clock_type: digital

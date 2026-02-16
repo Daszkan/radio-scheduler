@@ -49,13 +49,21 @@ def find_station_url(name: str, stations: List[Dict[str, Any]]) -> Optional[str]
 
 def main():
     was_news_playing = False
+    last_logged_minute = -1
     while True:
         config = load_config()
         stations = config.get("stations", [])
         sched = config.get("schedule", {})
         now = datetime.now()
-        weekday = now.strftime("%a").lower()[:3]
+        # Fix: Use locale-independent weekday mapping (0=Monday)
+        weekday_map = {0: "mon", 1: "tue", 2: "wed", 3: "thu", 4: "fri", 5: "sat", 6: "sun"}
+        weekday = weekday_map[now.weekday()]
         current_time_str = now.strftime("%H:%M")        
+
+        # Logowanie statusu co minutę dla celów debugowania
+        if now.minute != last_logged_minute:
+            logging.info(f"Heartbeat: Day={weekday}, Time={current_time_str}, Manual={MANUAL_OVERRIDE_LOCK.exists()}, NoNews={NO_NEWS_TODAY_LOCK.exists()}")
+            last_logged_minute = now.minute
 
         target_station_name = None
         
@@ -87,38 +95,31 @@ def main():
         if not no_news_today and should_play_news:
             offset = news_cfg.get("start_minute_offset", 0)
             if news_cfg.get("use_advanced", False):
-                for rule in news_cfg.get("advanced", []) or []:
+                for rule in news_cfg.get("advanced", []):
                     if weekday in rule["days"]:
                         start = datetime.strptime(rule["from"], "%H:%M").time()
                         end = datetime.strptime(rule["to"], "%H:%M").time()
                         if start <= now.time() <= end:
-                            # Calculate next news time with offset
-                            base = datetime.combine(now.date(), start)
-                            minutes_since_start = (now - base).total_seconds() // 60
-                            next_news = base + timedelta(minutes=((minutes_since_start // rule["interval_minutes"] + 1) * rule["interval_minutes"]))
-                            next_news = next_news.replace(minute=offset if offset else next_news.minute)
-                            if now >= next_news and now < next_news + timedelta(minutes=rule.get("duration_minutes", 8)):
-                                url = find_station_url(rule["station"], stations)
-                                target_station_name = rule["station"]
-                                news_played_this_cycle = True
-                                break # Przerwij pętlę reguł newsów
-            else:
+                            # Poprawiona logika: Sprawdź, czy bieżąca godzina jest w interwale i czy minuta pasuje do offsetu
+                            if now.hour % (rule["interval_minutes"] / 60) == 0 if rule["interval_minutes"] >= 60 else now.minute % rule["interval_minutes"] == 0:
+                                if offset <= now.minute < offset + rule.get("duration_minutes", 8):
+                                    target_station_name = rule["station"]
+                                    news_played_this_cycle = True
+                                    break
+            else: # Tryb prosty
                 simple = news_cfg.get("simple", {})
-                # Domyślne dni dla trybu prostego, jeśli nie zdefiniowano
                 days = simple.get("days", ["mon","tue","wed","thu","fri","sat","sun"])
                 if weekday in days and simple.get("station"):
-                    if "from" in simple and "to" in simple:
-                        start = datetime.strptime(simple.get("from", "00:00"), "%H:%M").time()
-                        end = datetime.strptime(simple["to"], "%H:%M").time()
-                        if start <= now.time() <= end:
-                            interval = simple.get("interval_minutes", 30)
-                            duration = simple.get("duration_minutes", 8)
-                            base = datetime.combine(now.date(), start)
-                            minutes_since_start = (now - base).total_seconds() // 60
-                            next_news = base + timedelta(minutes=((minutes_since_start // interval + 1) * interval))
-                            next_news = next_news.replace(minute=offset if offset else next_news.minute)
-                            if now >= next_news and now < next_news + timedelta(minutes=duration):
-                                url = find_station_url(simple["station"], stations)
+                    start = datetime.strptime(simple.get("from", "00:00"), "%H:%M").time()
+                    end = datetime.strptime(simple.get("to", "22:00"), "%H:%M").time()
+                    if start <= now.time() <= end:
+                        interval = simple.get("interval_minutes", 60)
+                        duration = simple.get("duration_minutes", 8)
+                        # Poprawiona logika dla trybu prostego
+                        # Sprawdź, czy godzina jest wielokrotnością interwału (dla pełnych godzin)
+                        # lub czy minuta jest wielokrotnością interwału (dla < 60 min)
+                        is_on_interval = (now.minute == 0 and now.hour % (interval / 60) == 0) if interval >= 60 else (now.minute % interval == 0)
+                        if is_on_interval and offset <= now.minute < offset + duration:
                                 target_station_name = simple["station"]
                                 news_played_this_cycle = True
             
@@ -149,9 +150,6 @@ def main():
                 mpc.play_url(target_url)
         
         was_news_playing = news_played_this_cycle
-        if news_played_this_cycle:
-            time.sleep(60) # Po newsach poczekaj minutę
-
         time.sleep(10)
 
 if __name__ == "__main__":

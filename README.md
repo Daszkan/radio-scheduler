@@ -10,6 +10,8 @@ RadioScheduler is a desktop application for scheduling and automatically playing
 *   **Advanced Scheduling**: Define playback rules for specific days of the week and time ranges.
 *   **News Breaks**: Automatically switch to a news station at specified times.
 *   **System Tray Integration**: Quick access to favorite stations, volume control, and playback status.
+*   **Visual Customization**: Choose between a digital or analog clock in the player view.
+*   **Daemon Status**: Visual indicator of the background service status directly in the GUI.
 *   **Sleep Timer**: Automatically stop playback after a specified duration.
 *   **Playlist Import**: Import stations from M3U/PLS files.
 *   **Connection Testing**: Verify station URLs directly within the editor.

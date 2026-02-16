@@ -3,7 +3,7 @@
 # Ustal katalog projektu
 PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 DIST_DIR="$PROJECT_DIR/dist"
-VERSION="v1.1"
+VERSION="v1.2"
 PACKAGE_NAME="RadioScheduler_${VERSION}_Linux"
 OUTPUT_DIR="$DIST_DIR/$PACKAGE_NAME"
 
